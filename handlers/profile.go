@@ -1,6 +1,13 @@
 // handlers/profile.go
 package handlers
 
+import (
+	"net/http"
+	"Backend/db"
+	"encoding/json"
+)
+
+// handlers/profile.go
 func ProfileHandler(w http.ResponseWriter, r *http.Request) {
     userID := r.Context().Value("user_id").(string)
 
@@ -15,10 +22,7 @@ func ProfileHandler(w http.ResponseWriter, r *http.Request) {
 
     if r.Method == http.MethodPut {
         var update models.User
-        if err := json.NewDecoder(r.Body).Decode(&update); err != nil {
-            http.Error(w, "Invalid request", http.StatusBadRequest)
-            return
-        }
+        json.NewDecoder(r.Body).Decode(&update)
         if err := db.UpdateUser(userID, update); err != nil {
             http.Error(w, "Update failed", http.StatusInternalServerError)
             return

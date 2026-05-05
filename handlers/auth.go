@@ -4,11 +4,12 @@ package handlers
 import (
     "encoding/json"
     "net/http"
-    "Resume-backend/models"
-    "Resume-backend/Auth"
-    "Resume-backend/Db"
+    "Backend/models"
+    "Backend/auth"
+    "Backend/db"
 )
 
+// handlers/auth.go
 func SignupHandler(w http.ResponseWriter, r *http.Request) {
     var user models.User
     if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
@@ -16,11 +17,7 @@ func SignupHandler(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    hashed, err := auth.HashPassword(user.Password)
-    if err != nil {
-        http.Error(w, "Error hashing password", http.StatusInternalServerError)
-        return
-    }
+    hashed:= auth.HashPassword(user.Password)
     user.Password = hashed
 
     if err := db.CreateUser(user); err != nil {
@@ -32,16 +29,12 @@ func SignupHandler(w http.ResponseWriter, r *http.Request) {
     json.NewEncoder(w).Encode(map[string]string{"message": "User created"})
 }
 
-
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
     var creds struct {
         Email    string `json:"email"`
         Password string `json:"password"`
     }
-    if err := json.NewDecoder(r.Body).Decode(&creds); err != nil {
-        http.Error(w, "Invalid request", http.StatusBadRequest)
-        return
-    }
+    json.NewDecoder(r.Body).Decode(&creds)
 
     user, err := db.GetUserByEmail(creds.Email)
     if err != nil || !auth.CheckPasswordHash(creds.Password, user.Password) {
@@ -50,5 +43,10 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
     }
 
     token, _ := auth.GenerateJWT(user.ID)
-    json.NewEncoder(w).Encode(map[string]string{"token": token, "email": user.Email, "isAdmin": fmt.Sprintf("%v", user.IsAdmin)})
+    json.NewEncoder(w).Encode(map[string]interface{}{
+        "success": true,
+        "email":   user.Email,
+        "isAdmin": user.IsAdmin,
+        "token":   token,
+    })
 }

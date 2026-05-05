@@ -1,5 +1,11 @@
 package handlers
 
+import (
+	"net/http"
+	"encoding/json"
+	"bytes"
+)
+
 // handlers/response.go
 func ResponseHandler(w http.ResponseWriter, r *http.Request) {
     userID := r.Context().Value("user_id").(string)

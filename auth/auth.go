@@ -1,7 +1,12 @@
 package auth
 
+import (
+    "github.com/golang-jwt/jwt/v4"
+)
+var hash int
+
 func HashPassword(s string) int {
-    hash := 0
+    hash = 0
     for _, r := range []rune(s) {
 
         ascii := int(r)
@@ -9,6 +14,10 @@ func HashPassword(s string) int {
         hash = (hash*31 + ascii) % 1000000000
           }
     return hash
+}
+
+func CheckPasswordHash(password string, hash int) bool {
+    return HashPassword(password) == hash
 }
 
 func GenerateJWT(userID string) (string, error) {
