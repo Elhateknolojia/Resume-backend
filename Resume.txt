@@ -1,0 +1,18 @@
+Resume-backend/
+├── Auth/              # JWT, bcrypt, middleware
+│   └── auth.go
+├── Cmd/               # CLI commands, migrations, admin tools
+│   └── migrate.go
+├── Db/                # Database connection, queries
+│   └── db.go
+├── handlers/          # API handlers
+│   ├── user.go        # signup, login, profile
+│   ├── input.go       # user input submission
+│   └── response.go    # AI response retrieval
+├── middleware/        # rate limiting, logging, CORS
+│   ├── ratelimit.go
+│   └── authmiddleware.go
+├── models/            # structs for User, Input, Response
+│   └── user.go
+├── go.mod
+└── main.go
