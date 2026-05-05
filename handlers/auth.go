@@ -11,14 +11,38 @@ import (
 
 // handlers/auth.go
 func SignupHandler(w http.ResponseWriter, r *http.Request) {
-    var user models.User
-    if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
+    var creds struct {
+        Name     string `json:"name"`
+        Email    string `json:"email"`
+        Phone    string `json:"phone"`
+        Address  string `json:"address"`
+        Password string `json:"password"`
+    }
+    if err := json.NewDecoder(r.Body).Decode(&creds); err != nil {
         http.Error(w, "Invalid request", http.StatusBadRequest)
         return
     }
 
-    hashed:= auth.HashPassword(user.Password)
-    user.Password = hashed
+	// Check if user already exists
+    existingUser, _ := db.GetUserByEmail(creds.Email)
+    if existingUser != nil {
+        w.WriteHeader(http.StatusConflict) // 409 Conflict
+        json.NewEncoder(w).Encode(map[string]string{
+            "error":   "User already exists, try forget password",
+            "message": "The email is already registered",
+        })
+        return
+    }
+
+    user := models.User{
+        Name:     creds.Name,
+        Email:    creds.Email,
+        Phone:    creds.Phone,
+        Address:  creds.Address,
+        Password: auth.HashPasswordString(creds.Password), // store stringified hash
+        IsAdmin:  false,
+        Tier:     "free",
+    }
 
     if err := db.CreateUser(user); err != nil {
         http.Error(w, "Error saving user", http.StatusInternalServerError)
@@ -47,6 +71,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
         "success": true,
         "email":   user.Email,
         "isAdmin": user.IsAdmin,
+        "tier":    user.Tier,
         "token":   token,
     })
 }

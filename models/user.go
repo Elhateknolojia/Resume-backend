@@ -1,13 +1,16 @@
 package models
 
+
 type User struct {
-    ID       string `json:"id"`
-    Name     string `json:"name"`
-    Email    string `json:"email"`
-    Phone    string `json:"phone"`
-    Address  string `json:"address"`
-    Password string `json:"-"` // stored hashed, not exposed
-    IsAdmin  bool   `json:"isAdmin"`
+    ID       string `json:"id" bson:"_id,omitempty"`
+    Name     string `json:"name" bson:"name"`
+    Email    string `json:"email" bson:"email"`
+    Phone    string `json:"phone" bson:"phone"`
+    Address  string `json:"address" bson:"address"`
+    Password string `json:"password" bson:"password"` // store stringified hash
+    IsAdmin  bool   `json:"isAdmin" bson:"isAdmin"`
+    Tier     string `json:"tier" bson:"tier"`
+	FreeDownloadsUsed int   `json:"freeDownloadsUsed" bson:"freeDownloadsUsed"`
 }
 
 type UserInput struct {

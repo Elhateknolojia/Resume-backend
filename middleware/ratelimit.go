@@ -37,7 +37,7 @@ func refillGlobal(limit int) {
 }
 
 // middleware enforcing token bucket limits
-func rateLimitMiddleware(next http.Handler) http.Handler {
+func RateLimitMiddleware(next http.Handler) http.Handler {
     return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
         mu.Lock()
         defer mu.Unlock()

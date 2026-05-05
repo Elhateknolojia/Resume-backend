@@ -21,6 +21,17 @@ func main() {
 	r.HandleFunc("/api/admin/login", handlers.AdminLoginHandler).Methods("POST")
 
 
+
+	r.Handle("/api/resume/check-eligibility", middleware.AuthMiddleware(http.HandlerFunc(handlers.CheckEligibilityHandler))).Methods("POST")
+
+
+
+	// AI routes
+	r.Handle("/api/ai/process-pdf-text", middleware.AuthMiddleware(http.HandlerFunc(handlers.ProcessPdfTextHandler))).Methods("POST")
+	r.Handle("/api/ai/generate-cover-letter", middleware.AuthMiddleware(http.HandlerFunc(handlers.GenerateCoverLetterHandler))).Methods("POST")
+	r.Handle("/api/ai/save-blueprint", middleware.AuthMiddleware(http.HandlerFunc(handlers.SaveBlueprintHandler))).Methods("POST")
+
+
     // Protected routes
     r.Handle("/api/profile", middleware.AuthMiddleware(http.HandlerFunc(handlers.ProfileHandler))).Methods("GET", "PUT")
     r.Handle("/api/userinput", middleware.AuthMiddleware(middleware.RateLimitMiddleware(http.HandlerFunc(handlers.UserInputHandler)))).Methods("POST")

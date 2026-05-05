@@ -11,7 +11,6 @@ func DownloadResumeHandler(w http.ResponseWriter, r *http.Request) {
         http.Error(w, "Free users cannot download resumes", http.StatusForbidden)
         return
     }
-    // Example: serve file or generate PDF
     fmt.Fprintln(w, "Resume PDF download started...")
 }
 

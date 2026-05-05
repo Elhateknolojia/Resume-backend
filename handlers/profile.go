@@ -5,9 +5,11 @@ import (
 	"net/http"
 	"Backend/db"
 	"encoding/json"
+	"Backend/models"
 )
 
 // handlers/profile.go
+
 func ProfileHandler(w http.ResponseWriter, r *http.Request) {
     userID := r.Context().Value("user_id").(string)
 
