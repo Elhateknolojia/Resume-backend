@@ -8,6 +8,9 @@ import (
     "Backend/handlers"                      // your own handlers
     "Backend/middleware"
     "Backend/db"
+    "os"
+
+    "github.com/joho/godotenv"   // ✅ add this
     // "Backend/auth"
     // "fmt"
 )
@@ -26,11 +29,19 @@ func main() {
     // fmt.Println("Hash1", p1)
     // fmt.Println("Hash", p)
 
-    mongoURI :=os.Getenv("MONGO_URI")
-    db.InitDB(mongoURI, "resumeDB", "users", "userinputs","admin","local")
+      err := godotenv.Load()
+    if err != nil {
+        log.Println("Warning: .env file not found, relying on system environment variables")
+    }
+
+    mongoURI := os.Getenv("MONGO_URI")
+    if mongoURI == "" {
+        log.Fatal("MONGO_URI not set in environment")
+    }
+
+    db.InitDB(mongoURI, "resumeDB", "users", "userinputs", "admin", "local")
 
     r := mux.NewRouter()
-
     // Public routes
     r.HandleFunc("/api/auth/signup", handlers.SignupHandler).Methods("POST")
     r.HandleFunc("/api/auth/login", handlers.LoginHandler).Methods("POST")
