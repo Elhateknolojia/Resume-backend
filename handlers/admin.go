@@ -30,3 +30,9 @@ func AdminLoginHandler(w http.ResponseWriter, r *http.Request) {
         "token":   token,
     })
 }
+
+// AdminStatsHandler returns basic system stats for the admin dashboard
+func AdminStatsHandler(w http.ResponseWriter, r *http.Request) {
+    stats := db.GetStats() // implement this in db package
+    json.NewEncoder(w).Encode(stats)
+}

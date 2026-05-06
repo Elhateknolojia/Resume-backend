@@ -3,7 +3,7 @@ package handlers
 import (
     "net/http"
     "Backend/db"
-    "encoding/json"
+    
 )
 
 func DownloadCoverLetterHandler(w http.ResponseWriter, r *http.Request) {

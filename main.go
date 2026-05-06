@@ -3,14 +3,29 @@ package main
 import (
     "log"
     "net/http"
-
+    ghandlers "github.com/gorilla/handlers" // alias Gorilla handlers
     "github.com/gorilla/mux"
-    "Backend/handlers"
+    "Backend/handlers"                      // your own handlers
     "Backend/middleware"
     "Backend/db"
+    // "Backend/auth"
+    // "fmt"
 )
 
+
 func main() {
+    // password :="12345678"
+    // password1 := "Jesus4Life"
+    // hash := auth.HashPassword(password)
+    // hash1 := auth.HashPassword(password1)
+    // fmt.Println("Hashed password1:",hash1)
+    // fmt.Println("Hashed password:",hash)
+
+    // p1:=auth.HashToString(hash1)
+    // p :=auth.HashToString(hash)
+    // fmt.Println("Hash1", p1)
+    // fmt.Println("Hash", p)
+
     db.InitDB("mongodb+srv://elitecv:Gn2Zo4q5PVVMHlfO@cluster0.rg5blpu.mongodb.net/?appName=Cluster0", "resumeDB")
 
     r := mux.NewRouter()
@@ -20,6 +35,7 @@ func main() {
     r.HandleFunc("/api/auth/login", handlers.LoginHandler).Methods("POST")
 	r.HandleFunc("/api/admin/login", handlers.AdminLoginHandler).Methods("POST")
 
+    r.HandleFunc("/api/admin/stats", handlers.AdminStatsHandler).Methods("GET")
 
 
 	r.Handle("/api/resume/check-eligibility", middleware.AuthMiddleware(http.HandlerFunc(handlers.CheckEligibilityHandler))).Methods("POST")
@@ -42,7 +58,13 @@ func main() {
 	r.Handle("/api/resume/download", middleware.AuthMiddleware(middleware.PremiumOnly(http.HandlerFunc(handlers.DownloadResumeHandler)))).Methods("GET")
 	r.Handle("/api/coverletter/download", middleware.AuthMiddleware(middleware.PremiumOnly(http.HandlerFunc(handlers.DownloadCoverLetterHandler)))).Methods("GET")
 
+    corsHandler := ghandlers.CORS(
+        ghandlers.AllowedOrigins([]string{"http://localhost:3000/"}),
+        ghandlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}),
+        ghandlers.AllowedHeaders([]string{"Authorization", "Content-Type"}),
+    )(r)
+
 
     log.Println("Server running on :8080")
-    log.Fatal(http.ListenAndServe(":8080", r))
+    log.Fatal(http.ListenAndServe(":8080", corsHandler))
 }

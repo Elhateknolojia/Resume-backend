@@ -25,10 +25,11 @@ func ProfileHandler(w http.ResponseWriter, r *http.Request) {
     if r.Method == http.MethodPut {
         var update models.User
         json.NewDecoder(r.Body).Decode(&update)
-        if err := db.UpdateUser(userID, update); err != nil {
+        if err := db.UpdateUser(userID, &update); err != nil {
             http.Error(w, "Update failed", http.StatusInternalServerError)
             return
         }
+
         json.NewEncoder(w).Encode(map[string]string{"message": "Profile updated"})
     }
 }

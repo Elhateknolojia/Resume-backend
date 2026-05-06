@@ -16,3 +16,18 @@ func GetAdminByEmail(email string) (models.Admin, error) {
     err := userCollection.FindOne(ctx, bson.M{"email": email, "role": "admin"}).Decode(&admin)
     return admin, err
 }
+
+
+func GetStats() map[string]interface{} {
+    usersCount := CountUsers()
+    adminsCount := CountAdmins()
+    premiumCount := CountByTier("premium")
+    freeCount := CountByTier("free")
+
+    return map[string]interface{}{
+        "users":   usersCount,
+        "admins":  adminsCount,
+        "premium": premiumCount,
+        "free":    freeCount,
+    }
+}

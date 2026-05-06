@@ -1,12 +1,13 @@
 package handlers
 
 import (
-    "crypto/rand"
     "encoding/json"
     "fmt"
+    "math/rand"
     "net/http"
     "time"
-        "Backend/db"
+
+    "Backend/db"
     "gopkg.in/gomail.v2"
 )
 
@@ -21,11 +22,8 @@ func sendEmailOTP(to string, otp string) error {
     return d.DialAndSend(m)
 }
 
-
 func SendOTPHandler(w http.ResponseWriter, r *http.Request) {
-    var req struct {
-        Email string `json:"email"`
-    }
+    var req struct{ Email string `json:"email"` }
     json.NewDecoder(r.Body).Decode(&req)
 
     user, err := db.GetUserByEmail(req.Email)
@@ -39,13 +37,16 @@ func SendOTPHandler(w http.ResponseWriter, r *http.Request) {
 
     user.OTPCode = otp
     user.OTPExpiry = expiry
-    db.UpdateUser(req.Email, user)
+    if err := db.UpdateUser(req.Email, user); err != nil {
+        http.Error(w, "Failed to update user", http.StatusInternalServerError)
+        return
+    }
 
-     if err := sendEmailOTP(req.Email, otp); err != nil {
+    if err := sendEmailOTP(req.Email, otp); err != nil {
         http.Error(w, "Failed to send OTP", http.StatusInternalServerError)
         return
     }
-    
+
     json.NewEncoder(w).Encode(map[string]string{"message": "OTP sent"})
 }
 

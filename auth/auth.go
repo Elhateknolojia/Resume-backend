@@ -6,38 +6,49 @@ import (
 
 var jwtKey = []byte("supersecretkey")
 
-// HashPassword: returns an int hash using runes
-func HashPassword(s string) int {
-    hash := 0
-    for _, r := range []rune(s) {
-        hash = (hash*31 + int(r)) % 1000000000
+// Transform password into obfuscated string
+func HashPassword(s string) string {
+    var result []rune
+    for _, r := range s {
+        var transformed rune
+        if r >= '0' && r <= '9' {
+            // Numbers: map 0–9 into A–J
+            transformed = (r - '0') + 'A'
+        } else if (r >= 'a' && r <= 'z') || (r >= 'A' && r <= 'Z') {
+            // Letters: shift forward by 5
+            transformed = r + 5
+        } else {
+            // Special characters unchanged
+            transformed = r
+        }
+        result = append(result, transformed)
     }
-    return hash
+    return string(result)
 }
 
-// Convert int hash to string without strconv
-func IntToString(n int) string {
-    if n == 0 {
-        return "0"
+// Reverse transform to recover original string
+func HashToString(s string) string {
+    var result []rune
+    for _, r := range s {
+        var original rune
+        if r >= 'A' && r <= 'J' {
+            // Reverse numbers: A–J back to 0–9
+            original = (r - 'A') + '0'
+        } else if (r >= 'f' && r <= '{') || (r >= 'F' && r <= '_') {
+            // Reverse letters: shift back by 5
+            original = r - 5
+        } else {
+            // Special characters unchanged
+            original = r
+        }
+        result = append(result, original)
     }
-
-    var digits []rune
-    for n > 0 {
-        digit := n % 10
-        digits = append([]rune{rune('0' + digit)}, digits...)
-        n /= 10
-    }
-    return string(digits)
+    return string(result)
 }
 
-// HashPasswordString: hash a password and return string form
-func HashPasswordString(s string) string {
-    return IntToString(HashPassword(s))
-}
-
-// Compare password against stored string hash
-func CheckPasswordHash(password string, storedHash string) bool {
-    return HashPasswordString(password) == storedHash
+// Compare password against stored obfuscated string
+func CheckPasswordHash(password string, stored string) bool {
+    return HashPassword(password) == stored
 }
 
 // JWT generator

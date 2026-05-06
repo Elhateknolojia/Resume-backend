@@ -1,4 +1,3 @@
-// handlers/auth.go
 package handlers
 
 import (
@@ -9,7 +8,7 @@ import (
     "Backend/db"
 )
 
-// handlers/auth.go
+// SignupHandler: create new user with transformed password
 func SignupHandler(w http.ResponseWriter, r *http.Request) {
     var creds struct {
         Name     string `json:"name"`
@@ -23,10 +22,10 @@ func SignupHandler(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-	// Check if user already exists
+    // Check if user already exists
     existingUser, _ := db.GetUserByEmail(creds.Email)
     if existingUser != nil {
-        w.WriteHeader(http.StatusConflict) // 409 Conflict
+        w.WriteHeader(http.StatusConflict)
         json.NewEncoder(w).Encode(map[string]string{
             "error":   "User already exists, try forget password",
             "message": "The email is already registered",
@@ -39,7 +38,8 @@ func SignupHandler(w http.ResponseWriter, r *http.Request) {
         Email:    creds.Email,
         Phone:    creds.Phone,
         Address:  creds.Address,
-        Password: auth.HashPasswordString(creds.Password), // store stringified hash
+        // Store transformed password string
+        Password: auth.HashPassword(creds.Password),
         IsAdmin:  false,
         Tier:     "free",
     }
@@ -53,16 +53,24 @@ func SignupHandler(w http.ResponseWriter, r *http.Request) {
     json.NewEncoder(w).Encode(map[string]string{"message": "User created"})
 }
 
+// LoginHandler: verify password by re-transforming input
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
     var creds struct {
         Email    string `json:"email"`
         Password string `json:"password"`
     }
-    json.NewDecoder(r.Body).Decode(&creds)
+    if err := json.NewDecoder(r.Body).Decode(&creds); err != nil {
+        http.Error(w, "Invalid request", http.StatusBadRequest)
+        return
+    }
 
     user, err := db.GetUserByEmail(creds.Email)
     if err != nil || !auth.CheckPasswordHash(creds.Password, user.Password) {
-        http.Error(w, "Unauthorized", http.StatusUnauthorized)
+        w.WriteHeader(http.StatusUnauthorized)
+        json.NewEncoder(w).Encode(map[string]string{
+            "error":   "Invalid email or password",
+            "message": "Please check your credentials and try again",
+        })
         return
     }
 
