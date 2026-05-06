@@ -26,7 +26,8 @@ func main() {
     // fmt.Println("Hash1", p1)
     // fmt.Println("Hash", p)
 
-    db.InitDB("mongodb+srv://elitecv:Gn2Zo4q5PVVMHlfO@cluster0.rg5blpu.mongodb.net/?appName=Cluster0", "resumeDB")
+    mongoURI :=os.Getenv("MONGO_URI")
+    db.InitDB(mongoURI, "resumeDB", "users", "userinputs","admin","local")
 
     r := mux.NewRouter()
 

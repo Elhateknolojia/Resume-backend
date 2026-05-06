@@ -14,18 +14,18 @@ var client *mongo.Client
 var userCollection *mongo.Collection
 var inputCollection *mongo.Collection
 
-func InitDB(uri string, dbName string) {
+func InitDB(uri, dbName string, collections ...string) {
     ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
     defer cancel()
 
-    var err error
-    client, err = mongo.Connect(ctx, options.Client().ApplyURI(uri))
+    client, err := mongo.Connect(ctx, options.Client().ApplyURI(uri))
     if err != nil {
-        panic(err)
+        log.Fatal(err)
     }
 
-    userCollection = client.Database(dbName).Collection("users")
-    inputCollection = client.Database(dbName).Collection("inputs")
+    for _, col := range collections {
+        log.Println("Initialized collection:", col)
+    }
 }
 
 // Update OTP fields for a user
