@@ -2,11 +2,12 @@ package db
 
 import (
     "context"
-    "log"
     "time"
 
+
+    "go.mongodb.org/mongo-driver/bson"
     "go.mongodb.org/mongo-driver/mongo"
-    "go.mongodb.org/mongo-driver/mongo/options"
+    "go.mongodb.org/mongo-driver/mongo/options" // ✅ this is required
 )
 
 var client *mongo.Client
@@ -20,10 +21,22 @@ func InitDB(uri string, dbName string) {
     var err error
     client, err = mongo.Connect(ctx, options.Client().ApplyURI(uri))
     if err != nil {
-        log.Fatal(err)
+        panic(err)
     }
 
     userCollection = client.Database(dbName).Collection("users")
     inputCollection = client.Database(dbName).Collection("inputs")
 }
 
+// Update OTP fields for a user
+func UpdateUserOTP(email, otp string, expiry int64) error {
+    _, err := userCollection.UpdateOne(
+        context.TODO(),
+        bson.M{"email": email},
+        bson.M{"$set": bson.M{
+            "otpCode":   otp,
+            "otpExpiry": expiry,
+        }},
+    )
+    return err
+}

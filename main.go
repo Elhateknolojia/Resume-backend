@@ -11,7 +11,7 @@ import (
 )
 
 func main() {
-    db.InitDB("mongodb://localhost:27017", "resumeDB")
+    db.InitDB("mongodb+srv://elitecv:Gn2Zo4q5PVVMHlfO@cluster0.rg5blpu.mongodb.net/?appName=Cluster0", "resumeDB")
 
     r := mux.NewRouter()
 
@@ -30,6 +30,8 @@ func main() {
 	r.Handle("/api/ai/process-pdf-text", middleware.AuthMiddleware(http.HandlerFunc(handlers.ProcessPdfTextHandler))).Methods("POST")
 	r.Handle("/api/ai/generate-cover-letter", middleware.AuthMiddleware(http.HandlerFunc(handlers.GenerateCoverLetterHandler))).Methods("POST")
 	r.Handle("/api/ai/save-blueprint", middleware.AuthMiddleware(http.HandlerFunc(handlers.SaveBlueprintHandler))).Methods("POST")
+
+	r.Handle("/api/ai/polish-summary", middleware.AuthMiddleware(http.HandlerFunc(handlers.PolishSummaryHandler))).Methods("POST")
 
 
     // Protected routes

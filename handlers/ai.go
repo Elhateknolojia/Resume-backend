@@ -5,6 +5,7 @@ import (
     "encoding/json"
     "io"
     "net/http"
+	"fmt"
 )
 
 // Process PDF text (rewrite/shorten/expand/ats)
@@ -62,3 +63,32 @@ func SaveBlueprintHandler(w http.ResponseWriter, r *http.Request) {
     defer resp.Body.Close()
     io.Copy(w, resp.Body)
 }
+
+func PolishSummaryHandler(w http.ResponseWriter, r *http.Request) {
+    var req struct {
+        Summary string `json:"summary"`
+        Model   string `json:"model"`
+    }
+    if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+        http.Error(w, "Invalid request", http.StatusBadRequest)
+        return
+    }
+
+    // Call your Python AI service (FastAPI on port 8000)
+    resp, err := http.Post("http://localhost:8000/polish-summary", "application/json",
+        bytes.NewBuffer([]byte(fmt.Sprintf(`{"summary":"%s","model":"%s"}`, req.Summary, req.Model))))
+    if err != nil {
+        http.Error(w, "AI service unavailable", http.StatusInternalServerError)
+        return
+    }
+    defer resp.Body.Close()
+
+    var result struct{ Result string `json:"result"` }
+    if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+        http.Error(w, "Invalid AI response", http.StatusInternalServerError)
+        return
+    }
+
+    json.NewEncoder(w).Encode(result)
+}
+
