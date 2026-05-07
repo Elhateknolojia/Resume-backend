@@ -19,7 +19,7 @@ func ProcessPdfTextHandler(w http.ResponseWriter, r *http.Request) {
 
     // Forward to Resume LLM service (port 8000)
     body, _ := json.Marshal(req)
-    resp, err := http.Post("http://localhost:8000/resume/rewrite", "application/json", bytes.NewBuffer(body))
+    resp, err := http.Post("https://godtekllm.onrender.com/resume/rewrite", "application/json", bytes.NewBuffer(body))
     if err != nil {
         http.Error(w, "Resume AI service error", http.StatusInternalServerError)
         return
@@ -37,7 +37,7 @@ func GenerateCoverLetterHandler(w http.ResponseWriter, r *http.Request) {
     json.NewDecoder(r.Body).Decode(&req)
 
     body, _ := json.Marshal(req)
-    resp, err := http.Post("http://localhost:8000/coverletter/generate", "application/json", bytes.NewBuffer(body))
+    resp, err := http.Post("https://godtekllm.onrender.com/coverletter/generate", "application/json", bytes.NewBuffer(body))
     if err != nil {
         http.Error(w, "Cover Letter AI service error", http.StatusInternalServerError)
         return
@@ -55,7 +55,7 @@ func SaveBlueprintHandler(w http.ResponseWriter, r *http.Request) {
 
     // Forward to Resume LLM service (port 8000)
     body, _ := json.Marshal(req)
-    resp, err := http.Post("http://localhost:8000/save-blueprint", "application/json", bytes.NewBuffer(body))
+    resp, err := http.Post("https://godtekllm.onrender.com/save-blueprint", "application/json", bytes.NewBuffer(body))
     if err != nil {
         http.Error(w, "Blueprint save error", http.StatusInternalServerError)
         return
@@ -76,7 +76,7 @@ func PolishSummaryHandler(w http.ResponseWriter, r *http.Request) {
 
     // Call your Python AI service (FastAPI on port 8000)
     body, _ := json.Marshal(req)
-    resp, err := http.Post("http://localhost:8000/resume/polish-summary", "application/json", bytes.NewBuffer(body))
+    resp, err := http.Post("https://godtekllm.onrender.com/resume/polish-summary", "application/json", bytes.NewBuffer(body))
     if err != nil {
         http.Error(w, "AI service unavailable", http.StatusInternalServerError)
         return
