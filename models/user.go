@@ -11,6 +11,7 @@ type User struct {
     IsAdmin  bool   `json:"isAdmin" bson:"isAdmin"`
     Tier     string `json:"tier" bson:"tier"`
 	FreeDownloadsUsed int   `json:"freeDownloadsUsed" bson:"freeDownloadsUsed"`
+    PendingResume     string `bson:"pendingResume,omitempty"`
 	OTPCode   string `json:"otpCode" bson:"otpCode"`
     OTPExpiry int64  `json:"otpExpiry" bson:"otpExpiry"`
 }

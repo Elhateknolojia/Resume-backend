@@ -6,6 +6,9 @@ import (
     "Backend/models"
     "Backend/auth"
     "Backend/db"
+    "Backend/middleware"
+    // "time"
+    "github.com/golang-jwt/jwt/v4"
 )
 
 // SignupHandler: create new user with transformed password
@@ -74,12 +77,45 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    token, _ := auth.GenerateJWT(user.ID)
-    json.NewEncoder(w).Encode(map[string]interface{}{
-        "success": true,
-        "email":   user.Email,
-        "isAdmin": user.IsAdmin,
-        "tier":    user.Tier,
-        "token":   token,
+    token, err := middleware.GenerateToken(user.ID)
+    if err != nil {
+        http.Error(w, "Could not generate token", http.StatusInternalServerError)
+        return
+    }
+
+    w.Header().Set("Content-Type", "application/json")
+    json.NewEncoder(w).Encode(map[string]string{
+        "token": token,
+        "user_id": user.ID,
     })
+
+}
+
+
+func RefreshHandler(w http.ResponseWriter, r *http.Request) {
+    authHeader := r.Header.Get("Authorization")
+    if authHeader == "" {
+        http.Error(w, "Missing token", http.StatusUnauthorized)
+        return
+    }
+
+    tokenStr := authHeader[len("Bearer "):]
+    claims := jwt.MapClaims{}
+    token, err := jwt.ParseWithClaims(tokenStr, claims, func(token *jwt.Token) (interface{}, error) {
+        return middleware.JwtKey(), nil
+    })
+    if err != nil || !token.Valid {
+        http.Error(w, "Invalid token", http.StatusUnauthorized)
+        return
+    }
+
+    // Issue new token with 10‑minute expiry
+    userID := claims["user_id"].(string)
+    newToken, err := middleware.GenerateToken(userID)
+    if err != nil {
+        http.Error(w, "Failed to refresh token", http.StatusInternalServerError)
+        return
+    }
+
+    json.NewEncoder(w).Encode(map[string]string{"token": newToken})
 }

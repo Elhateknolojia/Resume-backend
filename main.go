@@ -40,9 +40,21 @@ func main() {
     }
 
     db.InitDB(mongoURI, "resumeDB", "users", "userinputs", "admin", "local")
+    // in main.go
+    // Replace this line:
+// http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
+
+// With this:
+   
+
+
 
     r := mux.NewRouter()
     // Public routes
+
+    //static file server for generated PDFs
+     r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
+
     r.HandleFunc("/api/auth/signup", handlers.SignupHandler).Methods("POST")
     r.HandleFunc("/api/auth/login", handlers.LoginHandler).Methods("POST")
 	r.HandleFunc("/api/admin/login", handlers.AdminLoginHandler).Methods("POST")
@@ -51,7 +63,9 @@ func main() {
 
 
 	r.Handle("/api/resume/check-eligibility", middleware.AuthMiddleware(http.HandlerFunc(handlers.CheckEligibilityHandler))).Methods("POST")
+    r.Handle("/api/resume/export-html", middleware.AuthMiddleware(http.HandlerFunc(handlers.ExportHtmlHandler))).Methods("POST")
 
+    r.Handle("/api/auth/refresh", middleware.AuthMiddleware(http.HandlerFunc(handlers.RefreshHandler))).Methods("POST")
 
 
 	// AI routes
@@ -60,6 +74,7 @@ func main() {
 	r.Handle("/api/ai/save-blueprint", middleware.AuthMiddleware(http.HandlerFunc(handlers.SaveBlueprintHandler))).Methods("POST")
 
 	r.Handle("/api/ai/polish-summary", middleware.AuthMiddleware(http.HandlerFunc(handlers.PolishSummaryHandler))).Methods("POST")
+    r.Handle("/api/ai/coach", middleware.AuthMiddleware(http.HandlerFunc(handlers.CoachHandler))).Methods("POST")
 
 
     // Protected routes
@@ -67,7 +82,9 @@ func main() {
     r.Handle("/api/userinput", middleware.AuthMiddleware(middleware.RateLimitMiddleware(http.HandlerFunc(handlers.UserInputHandler)))).Methods("POST")
     r.Handle("/api/response", middleware.AuthMiddleware(middleware.RateLimitMiddleware(http.HandlerFunc(handlers.ResponseHandler)))).Methods("GET")
 
-	r.Handle("/api/resume/download", middleware.AuthMiddleware(middleware.PremiumOnly(http.HandlerFunc(handlers.DownloadResumeHandler)))).Methods("GET")
+	r.Handle("/api/resume/generate-pdf", middleware.AuthMiddleware(http.HandlerFunc(handlers.GeneratePdfHandler))).Methods("POST")
+    r.HandleFunc("/api/resume/save-pending", handlers.SavePendingResumeHandler).Methods("POST")
+
 	r.Handle("/api/coverletter/download", middleware.AuthMiddleware(middleware.PremiumOnly(http.HandlerFunc(handlers.DownloadCoverLetterHandler)))).Methods("GET")
 
 corsHandler := ghandlers.CORS(

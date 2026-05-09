@@ -1,6 +1,8 @@
 package handlers
 
 import (
+    // "Backend/models"
+    "log"
     "bytes"
     "encoding/json"
     "io"
@@ -92,3 +94,44 @@ func PolishSummaryHandler(w http.ResponseWriter, r *http.Request) {
     json.NewEncoder(w).Encode(result)
 }
 
+
+
+type CoachRequest struct {
+    ResumeData json.RawMessage `json:"resumeData"`
+    Model      string            `json:"model"`
+}
+
+type CoachResponse struct {
+    AtsScore     int      `json:"atsScore"`
+    Suggestions  []string `json:"suggestions"`
+}
+
+func CoachHandler(w http.ResponseWriter, r *http.Request) {
+    var req CoachRequest
+    bodyBytes, _ := io.ReadAll(r.Body)
+    log.Println("Incoming coach request:", string(bodyBytes))
+
+    if err := json.Unmarshal(bodyBytes, &req); err != nil {
+        http.Error(w, "Invalid request", http.StatusBadRequest)
+        return
+    }
+
+
+    body, _ := json.Marshal(req)
+    resp, err := http.Post("http://127.0.0.1:8000/resume/coach", "application/json", bytes.NewBuffer(body))
+    if err != nil {
+        http.Error(w, "Failed to reach AI service", http.StatusBadGateway)
+        return
+    }
+    defer resp.Body.Close()
+
+    if resp.StatusCode != http.StatusOK {
+        http.Error(w, "AI service error", resp.StatusCode)
+        return
+    }
+
+   data, _ := io.ReadAll(resp.Body)
+    w.Header().Set("Content-Type", "application/json")
+    w.Write(data)
+
+}
