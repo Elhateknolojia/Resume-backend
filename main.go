@@ -9,7 +9,7 @@ import (
     "Backend/middleware"
     "Backend/db"
     "os"
-
+    "github.com/rs/cors"
     "github.com/joho/godotenv"   // ✅ add this
     // "Backend/auth"
     // "fmt"
@@ -51,6 +51,10 @@ func main() {
 
     r := mux.NewRouter()
     // Public routes
+    r.HandleFunc("/api/pdf/import", handlers.ImportPdfHandler).Methods("POST")
+    
+    // PDF Reconstruction (Export)
+    r.HandleFunc("/api/pdf/reconstruct", handlers.ReconstructPdfHandler).Methods("POST")
 
     //static file server for generated PDFs
      r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
@@ -91,7 +95,8 @@ corsHandler := ghandlers.CORS(
     ghandlers.AllowedOrigins([]string{
         "http://localhost:4200",              // Angular dev
         "http://localhost:3000",              // if you test on 3000
-        "https://resume-six-dun.vercel.app",  // Vercel prod
+        "https://resume-six-dun.vercel.app",
+        "*", // Allow all origins (for development, be cautious in production)
     }),
     ghandlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}),
     ghandlers.AllowedHeaders([]string{"Authorization", "Content-Type"}),
