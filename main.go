@@ -9,7 +9,7 @@ import (
     "Backend/middleware"
     "Backend/db"
     "os"
-    "github.com/rs/cors"
+    // "github.com/rs/cors"
     "github.com/joho/godotenv"   // ✅ add this
     // "Backend/auth"
     // "fmt"
@@ -51,10 +51,10 @@ func main() {
 
     r := mux.NewRouter()
     // Public routes
-    r.HandleFunc("/api/pdf/import", handlers.ImportPdfHandler).Methods("POST")
+    // r.HandleFunc("/api/pdf/import", handlers.ImportPdfHandler).Methods("POST")
     
-    // PDF Reconstruction (Export)
-    r.HandleFunc("/api/pdf/reconstruct", handlers.ReconstructPdfHandler).Methods("POST")
+    // // PDF Reconstruction (Export)
+    // r.HandleFunc("/api/pdf/reconstruct", handlers.ReconstructPdfHandler).Methods("POST")
 
     //static file server for generated PDFs
      r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
@@ -80,12 +80,22 @@ func main() {
 	r.Handle("/api/ai/polish-summary", middleware.AuthMiddleware(http.HandlerFunc(handlers.PolishSummaryHandler))).Methods("POST")
     r.Handle("/api/ai/coach", middleware.AuthMiddleware(http.HandlerFunc(handlers.CoachHandler))).Methods("POST")
 
+    // Template routes
+    r.HandleFunc("/api/templates/{id}", handlers.LoadTemplateHandler).Methods("GET")
+
+    // OTP routes
+    r.HandleFunc("/api/auth/send-otp", handlers.SendOTPHandler).Methods("POST")
+    r.HandleFunc("/api/auth/verify-otp", handlers.VerifyOTPHandler).Methods("POST")
+
+    // User routes
+    r.Handle("/api/user", middleware.AuthMiddleware(http.HandlerFunc(handlers.GetUserHandler))).Methods("GET")
+
 
     // Protected routes
     r.Handle("/api/profile", middleware.AuthMiddleware(http.HandlerFunc(handlers.ProfileHandler))).Methods("GET", "PUT")
     r.Handle("/api/userinput", middleware.AuthMiddleware(middleware.RateLimitMiddleware(http.HandlerFunc(handlers.UserInputHandler)))).Methods("POST")
     r.Handle("/api/response", middleware.AuthMiddleware(middleware.RateLimitMiddleware(http.HandlerFunc(handlers.ResponseHandler)))).Methods("GET")
-
+    
 	r.Handle("/api/resume/generate-pdf", middleware.AuthMiddleware(http.HandlerFunc(handlers.GeneratePdfHandler))).Methods("POST")
     r.HandleFunc("/api/resume/save-pending", handlers.SavePendingResumeHandler).Methods("POST")
 
@@ -96,7 +106,7 @@ corsHandler := ghandlers.CORS(
         "http://localhost:4200",              // Angular dev
         "http://localhost:3000",              // if you test on 3000
         "https://resume-six-dun.vercel.app",
-        "*", // Allow all origins (for development, be cautious in production)
+        // "*",/ // Allow all origins (for development, be cautious in production)
     }),
     ghandlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}),
     ghandlers.AllowedHeaders([]string{"Authorization", "Content-Type"}),

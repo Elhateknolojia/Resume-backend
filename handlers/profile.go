@@ -33,3 +33,14 @@ func ProfileHandler(w http.ResponseWriter, r *http.Request) {
         json.NewEncoder(w).Encode(map[string]string{"message": "Profile updated"})
     }
 }
+
+func GetUserHandler(w http.ResponseWriter, r *http.Request) {
+    email := r.URL.Query().Get("email")
+    user, err := db.GetUserByEmail(email)
+    if err != nil {
+        http.Error(w, "User not found", http.StatusNotFound)
+        return
+    }
+    w.Header().Set("Content-Type", "application/json")
+    json.NewEncoder(w).Encode(user)
+}

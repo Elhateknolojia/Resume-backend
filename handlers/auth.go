@@ -83,13 +83,19 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    w.Header().Set("Content-Type", "application/json")
-    json.NewEncoder(w).Encode(map[string]string{
-        "token": token,
-        "user_id": user.ID,
-    })
+            resp := models.LoginResponse{
+                Token:   token,
+                UserID:  user.ID,
+                Email:   user.Email,
+                IsAdmin: user.IsAdmin,
+                Tier:    user.Tier,
+            }
 
-}
+            w.Header().Set("Content-Type", "application/json")
+            json.NewEncoder(w).Encode(resp)
+
+
+            }
 
 
 func RefreshHandler(w http.ResponseWriter, r *http.Request) {

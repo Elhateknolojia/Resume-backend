@@ -21,3 +21,11 @@ type UserInput struct {
     Text   string `json:"text" bson:"text"`
     Time   int64  `json:"time" bson:"time"`
 }
+
+type LoginResponse struct {
+    Token   string `json:"token"`
+    UserID  string `json:"user_id"`
+    Email   string `json:"email"`
+    IsAdmin bool   `json:"isAdmin"`
+    Tier    string `json:"tier"`
+}
