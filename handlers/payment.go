@@ -6,6 +6,7 @@ import (
     "os"
     "bytes"
     "io/ioutil"
+    "fmt"
     // "log"
 )
 
@@ -34,10 +35,14 @@ func InitiatePaymentHandler(w http.ResponseWriter, r *http.Request) {
 
     // Paystack expects amount in kobo (KES cents)
     payload := map[string]interface{}{
-        "email": req.Email,
-        "amount": req.Amount * 100, // Convert to kobo
-        "callback_url": "http://localhost:3000/payment/callback",
-    }
+    "email": req.Email,
+    "amount": req.Amount * 100,
+    "callback_url": fmt.Sprintf("http://localhost:3000/payment/callback?tierId=%s", req.TierId),
+    "metadata": map[string]string{
+        "tierId": req.TierId,
+    },
+}
+
 
     body, _ := json.Marshal(payload)
 

@@ -49,18 +49,25 @@ func GetUserHandler(w http.ResponseWriter, r *http.Request) {
 
 func UpgradeUserSubscriptionHandler(w http.ResponseWriter, r *http.Request) {
     var req struct {
-        Email string `json:"email"`
-        Tier  string `json:"tier"`
+        Email  string `json:"email"`
+        TierId string `json:"tierId"`
     }
     if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
         http.Error(w, "Invalid request", http.StatusBadRequest)
         return
     }
 
+    if req.TierId == "" {
+        http.Error(w, "Missing tierId", http.StatusBadRequest)
+        return
+    }
+
+
+
     filter := bson.M{"email": req.Email}
     update := bson.M{"$set": bson.M{
-        "tier": req.Tier,             // change free → premium/2w/1m/1y
-        "freeDownloadsUsed": 0,       // reset free counter
+        "tier": req.TierId,       // ✅ update tier field
+        "freeDownloadsUsed": 0,   // reset free downloads
     }}
 
     _, err := db.UserCollection.UpdateOne(context.TODO(), filter, update)
@@ -71,6 +78,7 @@ func UpgradeUserSubscriptionHandler(w http.ResponseWriter, r *http.Request) {
 
     json.NewEncoder(w).Encode(map[string]interface{}{
         "success": true,
-        "message": "Tier upgraded successfully",
+        "message": "Subscription upgraded",
     })
 }
+
