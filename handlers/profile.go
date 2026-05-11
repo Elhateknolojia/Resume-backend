@@ -6,6 +6,8 @@ import (
 	"Backend/db"
 	"encoding/json"
 	"Backend/models"
+    "context"
+    "go.mongodb.org/mongo-driver/bson"
 )
 
 // handlers/profile.go
@@ -43,4 +45,35 @@ func GetUserHandler(w http.ResponseWriter, r *http.Request) {
     }
     w.Header().Set("Content-Type", "application/json")
     json.NewEncoder(w).Encode(user)
+}
+
+func UpgradeUserSubscriptionHandler(w http.ResponseWriter, r *http.Request) {
+    var req struct {
+        Reference string `json:"reference"`
+    }
+    if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+        http.Error(w, "Invalid request", http.StatusBadRequest)
+        return
+    }
+
+    // Lookup transaction in Paystack (optional, double-check)
+    // Then update user record in MongoDB:
+    // e.g., set subscription = "premium", hasFreeDownloadLeft = false
+
+    // Example pseudo-code:
+    filter := bson.M{"reference": req.Reference}
+    update := bson.M{"$set": bson.M{
+        "subscription": "premium",
+        "hasFreeDownloadLeft": false,
+    }}
+    _, err := db.Users.UpdateOne(context.TODO(), filter, update)
+    if err != nil {
+        http.Error(w, "Failed to update subscription", http.StatusInternalServerError)
+        return
+    }
+
+    json.NewEncoder(w).Encode(map[string]interface{}{
+        "success": true,
+        "message": "Subscription upgraded",
+    })
 }

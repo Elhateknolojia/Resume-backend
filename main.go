@@ -55,8 +55,10 @@ func main() {
     
     // // PDF Reconstruction (Export)
     // r.HandleFunc("/api/pdf/reconstruct", handlers.ReconstructPdfHandler).Methods("POST")
-       http.HandleFunc("/api/payment/initiate", handlers.InitiatePaymentHandler)
-       http.HandleFunc("/api/payment/verify", handlers.VerifyPaymentHandler)
+     // Payment routes
+    r.HandleFunc("/api/payment/initiate", handlers.InitiatePaymentHandler).Methods("POST")
+    r.HandleFunc("/api/payment/verify", handlers.VerifyPaymentHandler).Methods("GET")
+
 
     //static file server for generated PDFs
      r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))

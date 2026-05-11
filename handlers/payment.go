@@ -10,7 +10,7 @@ import (
 )
 
 type InitRequest struct {
-    Phone   string `json:"phone"`
+    Email   string `json:"email"`
     TierId  string `json:"tierId"`
     Amount  int    `json:"amount"`
 }
@@ -34,7 +34,7 @@ func InitiatePaymentHandler(w http.ResponseWriter, r *http.Request) {
 
     // Paystack expects amount in kobo (KES cents)
     payload := map[string]interface{}{
-        "email": req.Phone + "@test.com", // Paystack requires email
+        "email": req.Email,
         "amount": req.Amount * 100, // Convert to kobo
         "callback_url": "http://localhost:3000/payment/callback",
     }
