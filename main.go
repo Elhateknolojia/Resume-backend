@@ -55,6 +55,8 @@ func main() {
     
     // // PDF Reconstruction (Export)
     // r.HandleFunc("/api/pdf/reconstruct", handlers.ReconstructPdfHandler).Methods("POST")
+       http.HandleFunc("/api/payment/initiate", handlers.InitiatePaymentHandler)
+       http.HandleFunc("/api/payment/verify", handlers.VerifyPaymentHandler)
 
     //static file server for generated PDFs
      r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
@@ -103,7 +105,7 @@ func main() {
 
 corsHandler := ghandlers.CORS(
     ghandlers.AllowedOrigins([]string{
-        "http://localhost:4200",              // Angular dev
+        // "http://localhost:4200",              // Angular dev
         "http://localhost:3000",              // if you test on 3000
         "https://resume-six-dun.vercel.app",
         // "*",/ // Allow all origins (for development, be cautious in production)
