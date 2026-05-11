@@ -49,24 +49,21 @@ func GetUserHandler(w http.ResponseWriter, r *http.Request) {
 
 func UpgradeUserSubscriptionHandler(w http.ResponseWriter, r *http.Request) {
     var req struct {
-        Reference string `json:"reference"`
+        Email string `json:"email"`
+        Tier  string `json:"tier"`
     }
     if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
         http.Error(w, "Invalid request", http.StatusBadRequest)
         return
     }
 
-    // Lookup transaction in Paystack (optional, double-check)
-    // Then update user record in MongoDB:
-    // e.g., set subscription = "premium", hasFreeDownloadLeft = false
-
-    // Example pseudo-code:
-    filter := bson.M{"reference": req.Reference}
+    filter := bson.M{"email": req.Email}
     update := bson.M{"$set": bson.M{
-        "subscription": "premium",
-        "hasFreeDownloadLeft": false,
+        "tier": req.Tier,             // change free → premium/2w/1m/1y
+        "freeDownloadsUsed": 0,       // reset free counter
     }}
-    _, err := db.Users.UpdateOne(context.TODO(), filter, update)
+
+    _, err := db.UserCollection.UpdateOne(context.TODO(), filter, update)
     if err != nil {
         http.Error(w, "Failed to update subscription", http.StatusInternalServerError)
         return
@@ -74,6 +71,6 @@ func UpgradeUserSubscriptionHandler(w http.ResponseWriter, r *http.Request) {
 
     json.NewEncoder(w).Encode(map[string]interface{}{
         "success": true,
-        "message": "Subscription upgraded",
+        "message": "Tier upgraded successfully",
     })
 }

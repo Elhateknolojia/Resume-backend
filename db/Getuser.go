@@ -10,7 +10,7 @@ import (
 
 func GetUserByEmail(email string) (*models.User, error) {
     var user models.User
-    err := userCollection.FindOne(context.TODO(), bson.M{"email": email}).Decode(&user)
+    err := UserCollection.FindOne(context.TODO(), bson.M{"email": email}).Decode(&user)
     if err != nil {
         return nil, err
     }
@@ -20,7 +20,7 @@ func GetUserByEmail(email string) (*models.User, error) {
 
 func GetUserByID(id string) (*models.User, error) {
     var user models.User
-    err := userCollection.FindOne(context.TODO(), bson.M{"_id": id}).Decode(&user)
+    err := UserCollection.FindOne(context.TODO(), bson.M{"_id": id}).Decode(&user)
     if err != nil {
         return nil, err
     }
@@ -30,7 +30,7 @@ func GetUserByID(id string) (*models.User, error) {
 
 // Count all users
 func CountUsers() int64 {
-    count, err := userCollection.CountDocuments(context.TODO(), bson.M{})
+    count, err := UserCollection.CountDocuments(context.TODO(), bson.M{})
     if err != nil {
         return 0
     }
@@ -39,7 +39,7 @@ func CountUsers() int64 {
 
 // Count all admins
 func CountAdmins() int64 {
-    count, err := userCollection.CountDocuments(context.TODO(), bson.M{"isAdmin": true})
+    count, err := UserCollection.CountDocuments(context.TODO(), bson.M{"isAdmin": true})
     if err != nil {
         return 0
     }
@@ -48,7 +48,7 @@ func CountAdmins() int64 {
 
 // Count users by tier (e.g. "free", "premium")
 func CountByTier(tier string) int64 {
-    count, err := userCollection.CountDocuments(context.TODO(), bson.M{"tier": tier})
+    count, err := UserCollection.CountDocuments(context.TODO(), bson.M{"tier": tier})
     if err != nil {
         return 0
     }

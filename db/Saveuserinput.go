@@ -18,6 +18,6 @@ func SaveUserInput(userID string, text string) error {
         Text:   text,
         Time:   time.Now().Unix(),
     }
-    _, err := inputCollection.InsertOne(ctx, input)
+    _, err := InputCollection.InsertOne(ctx, input)
     return err
 }

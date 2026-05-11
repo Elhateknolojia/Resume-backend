@@ -90,6 +90,8 @@ func main() {
     // OTP routes
     r.HandleFunc("/api/auth/send-otp", handlers.SendOTPHandler).Methods("POST")
     r.HandleFunc("/api/auth/verify-otp", handlers.VerifyOTPHandler).Methods("POST")
+    
+    r.HandleFunc("/api/payment/upgrade", handlers.UpgradeUserSubscriptionHandler).Methods("POST")
 
     // User routes
     r.Handle("/api/user", middleware.AuthMiddleware(http.HandlerFunc(handlers.GetUserHandler))).Methods("GET")

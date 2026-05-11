@@ -11,8 +11,8 @@ import (
 )
 
 var client *mongo.Client
-var userCollection *mongo.Collection
-var inputCollection *mongo.Collection
+var UserCollection *mongo.Collection
+var InputCollection *mongo.Collection
 
 func InitDB(uri, dbName string, collections ...string) {
     ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -27,8 +27,8 @@ func InitDB(uri, dbName string, collections ...string) {
     db := client.Database(dbName)
 
     // initialize collections explicitly
-    userCollection = db.Collection("users")
-    inputCollection = db.Collection("userinputs")
+    UserCollection = db.Collection("users")
+    InputCollection = db.Collection("userinputs")
     // add more if needed: adminCollection := db.Collection("admin")
 
     log.Println("Connected to MongoDB:", dbName)
@@ -37,7 +37,7 @@ func InitDB(uri, dbName string, collections ...string) {
 
 // Update OTP fields for a user
 func UpdateUserOTP(email, otp string, expiry int64) error {
-    _, err := userCollection.UpdateOne(
+    _, err := UserCollection.UpdateOne(
         context.TODO(),
         bson.M{"email": email},
         bson.M{"$set": bson.M{

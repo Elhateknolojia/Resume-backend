@@ -12,7 +12,7 @@ import (
 func CreateUser(user models.User) error {
     ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
     defer cancel()
-    _, err := userCollection.InsertOne(ctx, user)
+    _, err := UserCollection.InsertOne(ctx, user)
     return err
 }
 
@@ -21,7 +21,7 @@ func CreateOrUpdateUser(user *models.User) error {
     ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
     defer cancel()
 
-    _, err := userCollection.UpdateOne(
+    _, err := UserCollection.UpdateOne(
         ctx,
         bson.M{"email": user.Email},
         bson.M{"$set": user},

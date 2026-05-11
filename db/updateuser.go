@@ -10,7 +10,7 @@ import (
 )
 
 func UpdateUser(email string, user *models.User) error {
-    _, err := userCollection.UpdateOne(
+    _, err := UserCollection.UpdateOne(
         context.TODO(),
         bson.M{"email": email},
         bson.M{"$set": user},

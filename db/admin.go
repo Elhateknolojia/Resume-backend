@@ -13,7 +13,7 @@ func GetAdminByEmail(email string) (models.Admin, error) {
     defer cancel()
 
     var admin models.Admin
-    err := userCollection.FindOne(ctx, bson.M{"email": email, "role": "admin"}).Decode(&admin)
+    err := UserCollection.FindOne(ctx, bson.M{"email": email, "role": "admin"}).Decode(&admin)
     return admin, err
 }
 
