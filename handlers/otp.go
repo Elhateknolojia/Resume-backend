@@ -29,8 +29,13 @@ func sendEmailOTP(to string, otp string) error {
     plainTextContent := fmt.Sprintf("Your OTP code is: %s. It expires in 10 minutes.", otp)
     message := mail.NewSingleEmail(from, subject, mail.NewEmail("", to), plainTextContent, plainTextContent)
     client := sendgrid.NewSendClient(os.Getenv("SENDGRID_API_KEY"))
-    _, err := client.Send(message)
-    return err
+    res, err := client.Send(message)
+    if err != nil {
+        log.Printf("Sendgrid error : %v", err)
+        return err
+    }
+    log.Printf("Sendgrid response: %d %s", res.StatusCode, res.Body)
+    return nil
 }
 
 func sendEmailOTPGMAILSMTP(to string, otp string) error {
