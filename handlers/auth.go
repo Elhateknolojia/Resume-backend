@@ -1,14 +1,19 @@
 package handlers
 
 import (
-    "encoding/json"
-    "net/http"
-    "Backend/models"
-    "Backend/auth"
-    "Backend/db"
-    "Backend/middleware"
-    // "time"
-    "github.com/golang-jwt/jwt/v4"
+	"Backend/auth"
+	"Backend/db"
+	"Backend/middleware"
+	"Backend/models"
+    "time"
+	"encoding/json"
+	// "go/token"
+	// "hash"
+	"log"
+	"net/http"
+
+	// "time"
+	"github.com/golang-jwt/jwt/v4"
 )
 
 // SignupHandler: create new user with transformed password
@@ -58,16 +63,24 @@ func SignupHandler(w http.ResponseWriter, r *http.Request) {
 
 // LoginHandler: verify password by re-transforming input
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
+    start := time.Now()
     var creds struct {
         Email    string `json:"email"`
         Password string `json:"password"`
     }
+
+    log.Printf("Decode login request in %s", time.Since(start))
     if err := json.NewDecoder(r.Body).Decode(&creds); err != nil {
         http.Error(w, "Invalid request", http.StatusBadRequest)
         return
     }
 
+
+    dbSart := time.Now()
     user, err := db.GetUserByEmail(creds.Email)
+    log.Printf("DB lookup in %s", time.Since(dbSart))
+
+    hashStart := time.Now()
     if err != nil || !auth.CheckPasswordHash(creds.Password, user.Password) {
         w.WriteHeader(http.StatusUnauthorized)
         json.NewEncoder(w).Encode(map[string]string{
@@ -76,12 +89,17 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
         })
         return
     }
+    log.Printf("Password verification in %s", time.Since(hashStart))
 
+
+    tokenStart := time.Now()
     token, err := middleware.GenerateToken(user.ID)
     if err != nil {
         http.Error(w, "Could not generate token", http.StatusInternalServerError)
         return
     }
+    log.Printf("Token generation in %s", time.Since(tokenStart))
+
 
             resp := models.LoginResponse{
                 Token:   token,
