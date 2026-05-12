@@ -22,8 +22,8 @@ func InitDB(uri, dbName string, collections ...string) {
         ApplyURI(uri).
         SetMaxPoolSize(100).        // ✅ allow up to 50 concurrent connections
         SetMinPoolSize(10).         // ✅ keep at least 5 warm connections
-        SetMaxConnIdleTime(20 * time.Second) // ✅ recycle idle connections
-
+        SetMaxConnIdleTime(60 * time.Second) // ✅ recycle idle connections
+    
     client, err:= mongo.Connect(ctx, clientOpts)
     if err != nil {
         log.Fatal(err)

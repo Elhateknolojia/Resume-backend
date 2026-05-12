@@ -9,6 +9,7 @@ import (
     "os"
     "time"
     "Backend/db"
+    "log"
     "Backend/auth"
     "Backend/models"
     "gopkg.in/gomail.v2"
@@ -63,11 +64,13 @@ func SendOTPHandler(w http.ResponseWriter, r *http.Request) {
     }
 
     if err := db.CreateOrUpdateUser(user); err != nil {
+        log.Printf("DB save error: %v", err)
         http.Error(w, "Failed to save user", http.StatusInternalServerError)
         return
     }
 
     if err := sendEmailOTP(req.Email, otp); err != nil {
+        log.Printf("email send error: %v", err)
         http.Error(w, "Failed to send OTP", http.StatusInternalServerError)
         return
     }

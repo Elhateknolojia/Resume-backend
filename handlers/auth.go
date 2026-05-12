@@ -58,7 +58,7 @@ func SignupHandler(w http.ResponseWriter, r *http.Request) {
         IsAdmin:  false,
         Tier:     "free",
     }
-    log.Printf("User struct creation in %s", time.Since(creatuserstart))
+    log.Printf("User  creation in %s", time.Since(creatuserstart))
 
     if err := db.CreateUser(user); err != nil {
         http.Error(w, "Error saving user", http.StatusInternalServerError)
