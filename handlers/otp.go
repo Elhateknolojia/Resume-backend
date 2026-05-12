@@ -13,6 +13,8 @@ import (
     "Backend/auth"
     "Backend/models"
     "gopkg.in/gomail.v2"
+"github.com/sendgrid/sendgrid-go"
+    "github.com/sendgrid/sendgrid-go/helpers/mail"
 )
 
 // generateOTP creates a cryptographically secure 6-digit code
@@ -22,6 +24,16 @@ func generateOTP() string {
 }
 
 func sendEmailOTP(to string, otp string) error {
+    from := mail.NewEmail("Resume App", os.Getenv("SMTP_USER"))
+    subject := "Your Verification Code"
+    plainTextContent := fmt.Sprintf("Your OTP code is: %s. It expires in 10 minutes.", otp)
+    message := mail.NewSingleEmail(from, subject, mail.NewEmail("", to), plainTextContent, plainTextContent)
+    client := sendgrid.NewSendClient(os.Getenv("SENDGRID_API_KEY"))
+    _, err := client.Send(message)
+    return err
+}
+
+func sendEmailOTPGMAILSMTP(to string, otp string) error {
     m := gomail.NewMessage()
     m.SetHeader("From", os.Getenv("SMTP_USER"))
     m.SetHeader("To", to)
