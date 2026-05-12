@@ -1,0 +1,208 @@
+{
+  "name": "Robert Williams",
+  "email": "robert.williams@globaltech.com",
+  "phone": "+1 555-123-4567",
+  "phoneCountryCode": "+1",
+  "location": "Seattle, USA",
+  "summary": "Visionary CEO with decades of experience leading multinational corporations, driving innovation, and delivering shareholder value.",
+  "sections": [],
+  "experience": [
+    {
+      "id": "exp1",
+      "company": "GlobalTech Corporation",
+      "title": "Chief Executive Officer",
+      "startDate": "Jan 2000",
+      "endDate": "",
+      "current": true,
+      "content": "Directed corporate strategy, expanded global market share, and oversaw $10B in annual revenue growth.",
+      "x": 50,
+      "y": 400,
+      "width": 700,
+      "height": 100,
+      "style": { "fontSize": 12, "color": "#000000", "textAlign": "left" }
+    }
+  ],
+  "education": [
+    {
+      "id": "edu1",
+      "school": "Harvard Business School",
+      "degree": "MBA, Strategic Management",
+      "startDate": "Sep 1990",
+      "endDate": "Jun 1992",
+      "description": "Focused on corporate governance, finance, and leadership.",
+      "x": 50,
+      "y": 650,
+      "width": 700,
+      "height": 80,
+      "style": { "fontSize": 12, "color": "#000000", "textAlign": "left" }
+    }
+  ],
+  "skills": [
+    {
+      "id": "skill1",
+      "name": "Leadership",
+      "level": 95,
+      "x": 50,
+      "y": 850,
+      "width": 200,
+      "height": 40,
+      "style": { "fontSize": 12, "color": "#000000", "textAlign": "left" }
+    },
+    {
+      "id": "skill2",
+      "name": "Corporate Strategy",
+      "level": 90,
+      "x": 150,
+      "y": 850,
+      "width": 200,
+      "height": 40,
+      "style": { "fontSize": 12, "color": "#000000", "textAlign": "left" }
+    }
+  ],
+  "referees": [
+    {
+      "id": "ref1",
+      "name": "Jane Doe",
+      "email": "jane.doe@company.com",
+      "phone": "+1 555-987-6543",
+      "address": "Company HQ, New York, NY",
+      "x": 50,
+      "y": 1000,
+      "width": 700,
+      "height": 60,
+      "style": { "fontSize": 12, "color": "#000000", "textAlign": "left" }
+    }
+  ],
+  "boards": [
+    {
+      "id": "board1",
+      "name": "Philanthropy Foundation",
+      "role": "Board Member",
+      "x": 50,
+      "y": 1100,
+      "width": 700,
+      "height": 60,
+      "style": { "fontSize": 12, "color": "#000000", "textAlign": "left" }
+    },
+    {
+      "id": "board2",
+      "name": "Tech Innovation Council",
+      "role": "Chairman",
+      "x": 50,
+      "y": 1180,
+      "width": 700,
+      "height": 60,
+      "style": { "fontSize": 12, "color": "#000000", "textAlign": "left" }
+    }
+  ],
+  "hobbies": [],
+  "website": "https://robertwilliamsleadership.com",
+  "skillUrl": "",
+  "qrCode": "",
+  "pageCount": 1,
+  "role": "Chief Executive Officer",
+  "tier": "free",
+  "freeDownloadsUsed": 0,
+  "isAdmin": false,
+  "otpCode": "",
+  "metadataStyle": {
+    "x": 0,
+    "y": 0,
+    "width": 800,
+    "isLocked": true,
+    "isVisible": true,
+    "style": { "fontSize": 12, "color": "#000000", "textAlign": "left" }
+  },
+  "summaryStyle": {
+    "x": 0,
+    "y": 200,
+    "width": 800,
+    "isLocked": true,
+    "isVisible": true,
+    "style": { "fontSize": 12, "color": "#000000", "textAlign": "left" }
+  },
+  "experienceStyle": {
+    "x": 0,
+    "y": 350,
+    "width": 800,
+    "isLocked": true,
+    "isVisible": true,
+    "style": { "fontSize": 12, "color": "#000000", "textAlign": "left" }
+  },
+  "educationStyle": {
+    "x": 0,
+    "y": 600,
+    "width": 800,
+    "isLocked": true,
+    "isVisible": true,
+    "style": { "fontSize": 12, "color": "#000000", "textAlign": "left" }
+  },
+  "skillsStyle": {
+    "x": 0,
+    "y": 800,
+    "width": 800,
+    "isLocked": true,
+    "isVisible": true,
+    "style": { "fontSize": 12, "color": "#000000", "textAlign": "left" }
+  },
+  "refereeStyle": {
+    "x": 0,
+    "y": 950,
+    "width": 800,
+    "isLocked": true,
+    "isVisible": true,
+    "style": { "fontSize": 12, "color": "#000000", "textAlign": "left" }
+  },
+  "qrStyle": {
+    "x": 650,
+    "y": 50,
+    "width": 100,
+    "height": 100,
+    "isLocked": true,
+    "isVisible": true,
+    "style": { "opacity": 1 }
+  },
+  "nameStyle": {
+    "x": 300,
+    "y": 50,
+    "width": 200,
+    "isVisible": true,
+    "style": {
+      "fontSize": 32,
+      "fontWeight": "900",
+      "color": "#000000",
+      "textAlign": "center"
+    }
+  },
+  "emailStyle": {
+    "x": 300,
+    "y": 100,
+    "width": 200,
+    "isVisible": true,
+    "style": {
+      "fontSize": 10,
+      "fontWeight": "900",
+      "color": "#a1a1aa",
+      "textAlign": "center"
+    }
+  },
+  "phoneStyle": {
+    "x": 300,
+    "y": 120,
+    "width": 200,
+    "isVisible": true,
+    "style": {
+      "fontSize": 10,
+      "fontWeight": "900",
+      "color": "#a1a1aa",
+      "textAlign": "center"
+    }
+  },
+  "aesthetics": {
+    "fontFamily": "Inter",
+    "primaryColor": "#0f172a",
+    "backgroundColor": "#f8fafc",
+    "fontSize": 14,
+    "elements": []
+  }
+}

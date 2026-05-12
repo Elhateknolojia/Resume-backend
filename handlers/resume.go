@@ -7,6 +7,7 @@ import (
     "Backend/db"
     "github.com/jung-kurt/gofpdf" // simple PDF generator
     "github.com/gorilla/mux"
+    "fmt"
     // "strconv"
     // "io"
     "os"
@@ -273,31 +274,24 @@ func ExportHtmlHandler(w http.ResponseWriter, r *http.Request) {
 
 
 // Mock template store (later replace with DB or files)
-var templates = map[string]map[string]interface{}{
-    "modern": {
-        "name": "John Smith",
-        "email": "john.smith@email.com",
-        "phone": "555-123-4567",
-        "location": "New York, USA",
-        "summary": "Experienced software engineer...",
-        "experience": []map[string]string{
-            {"title": "Senior Software Engineer", "company": "TechCorp Inc.", "startDate": "Jan 2020", "endDate": "Dec 2023", "content": "Led a team..."},
-        },
-        "referees": []map[string]string{
-            {"name": "Jane Doe", "email": "jane.doe@company.com", "phone": "+1 555-987-6543", "address": "Company HQ, San Francisco, CA"},
-        },
-    },
-    "minimal": { /* same structure */ },
-    "ceo": { /* same structure */ },
-}
+// var templates = map[string]map[string]interface{}{
+//     "modern": templateModern, // defined in templates/modern.json
+//     "minimal": templateMinimal, // defined in templates/minimal.json
+//     "ceo": templateCEO, // defined in templates/ceo.json
+// }
 
 func LoadTemplateHandler(w http.ResponseWriter, r *http.Request) {
     id := mux.Vars(r)["id"]
-    tmpl, ok := templates[id]
-    if !ok {
+    path := fmt.Sprintf("templates/%s.json", id)
+
+    data, err := os.ReadFile(path)
+
+    if err != nil {
         http.Error(w, "Template not found", http.StatusNotFound)
         return
     }
+
+
     w.Header().Set("Content-Type", "application/json")
-    json.NewEncoder(w).Encode(tmpl)
+    w.Write(data)
 }
