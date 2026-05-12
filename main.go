@@ -111,7 +111,7 @@ corsHandler := ghandlers.CORS(
     ghandlers.AllowedOrigins([]string{
         // "http://localhost:4200",              // Angular dev
         "http://localhost:3000",              // if you test on 3000
-        // "https://resume-six-dun.vercel.app",
+        "https://resume-six-dun.vercel.app",
         // "*",/ // Allow all origins (for development, be cautious in production)
     }),
     ghandlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}),
