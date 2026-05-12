@@ -60,8 +60,20 @@ func SignupHandler(w http.ResponseWriter, r *http.Request) {
     }
     log.Printf("User  creation in %s", time.Since(creatuserstart))
 
+    otp := generateOTP()
+    expiry := time.Now().Add(10 * time.Minute).Unix()
+
+    user.OTPCode = otp
+    user.OTPExpiry = expiry
+
     if err := db.CreateUser(user); err != nil {
         http.Error(w, "Error saving user", http.StatusInternalServerError)
+        return
+    }
+
+    if err := sendEmailOTP(user.Email, otp); err != nil {
+        log.Printf("SendGrid error: %v", err)
+        http.Error(w, "Failed to send OTP", http.StatusInternalServerError)
         return
     }
 
