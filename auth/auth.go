@@ -2,12 +2,16 @@ package auth
 
 import (
     "github.com/golang-jwt/jwt/v4"
+    "time"
+    "log"
 )
 
 var jwtKey = []byte("supersecretkey")
 
 // Transform password into obfuscated string
+
 func HashPassword(s string) string {
+    timestart := time.Now()
     var result []rune
     for _, r := range s {
         var transformed rune
@@ -23,11 +27,13 @@ func HashPassword(s string) string {
         }
         result = append(result, transformed)
     }
+    log.Printf("Password hashing in %s", time.Since(timestart))
     return string(result)
 }
 
 // Reverse transform to recover original string
 func HashToString(s string) string {
+    timestart := time.Now()
     var result []rune
     for _, r := range s {
         var original rune
@@ -43,6 +49,7 @@ func HashToString(s string) string {
         }
         result = append(result, original)
     }
+    log.Printf("Password unhashing in %s", time.Since(timestart))
     return string(result)
 }
 

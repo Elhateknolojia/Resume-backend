@@ -18,6 +18,7 @@ import (
 
 // SignupHandler: create new user with transformed password
 func SignupHandler(w http.ResponseWriter, r *http.Request) {
+    start := time.Now()
     var creds struct {
         Name     string `json:"name"`
         Email    string `json:"email"`
@@ -25,13 +26,18 @@ func SignupHandler(w http.ResponseWriter, r *http.Request) {
         Address  string `json:"address"`
         Password string `json:"password"`
     }
+    log.Printf("Decode signup request in %s", time.Since(start))
     if err := json.NewDecoder(r.Body).Decode(&creds); err != nil {
         http.Error(w, "Invalid request", http.StatusBadRequest)
         return
     }
 
     // Check if user already exists
+    existingUserstart := time.Now()
     existingUser, _ := db.GetUserByEmail(creds.Email)
+    log.Printf("Existing user lookup in %s", time.Since(existingUserstart))
+
+
     if existingUser != nil {
         w.WriteHeader(http.StatusConflict)
         json.NewEncoder(w).Encode(map[string]string{
@@ -41,6 +47,7 @@ func SignupHandler(w http.ResponseWriter, r *http.Request) {
         return
     }
 
+    creatuserstart := time.Now()
     user := models.User{
         Name:     creds.Name,
         Email:    creds.Email,
@@ -51,6 +58,7 @@ func SignupHandler(w http.ResponseWriter, r *http.Request) {
         IsAdmin:  false,
         Tier:     "free",
     }
+    log.Printf("User struct creation in %s", time.Since(creatuserstart))
 
     if err := db.CreateUser(user); err != nil {
         http.Error(w, "Error saving user", http.StatusInternalServerError)

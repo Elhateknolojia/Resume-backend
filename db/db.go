@@ -18,21 +18,24 @@ func InitDB(uri, dbName string, collections ...string) {
     ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
     defer cancel()
 
-    var err error
-    client, err = mongo.Connect(ctx, options.Client().ApplyURI(uri))
+    clientOpts := options.Client().
+        ApplyURI(uri).
+        SetMaxPoolSize(100).        // ✅ allow up to 50 concurrent connections
+        SetMinPoolSize(10).         // ✅ keep at least 5 warm connections
+        SetMaxConnIdleTime(20 * time.Second) // ✅ recycle idle connections
+
+    client, err:= mongo.Connect(ctx, clientOpts)
     if err != nil {
         log.Fatal(err)
     }
 
     db := client.Database(dbName)
-
-    // initialize collections explicitly
     UserCollection = db.Collection("users")
     InputCollection = db.Collection("userinputs")
-    // add more if needed: adminCollection := db.Collection("admin")
 
     log.Println("Connected to MongoDB:", dbName)
 }
+
 
 
 // Update OTP fields for a user
