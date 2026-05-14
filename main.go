@@ -52,7 +52,16 @@ func main() {
     r := mux.NewRouter()
     // Public routes
     // r.HandleFunc("/api/pdf/import", handlers.ImportPdfHandler).Methods("POST")
-    
+    // PDF routes
+    r.HandleFunc("/api/pdf/import", handlers.ImportPdfHandler).Methods("POST")
+    r.HandleFunc("/api/pdf/save", handlers.SavePdfHandler).Methods("POST")
+
+
+    r.HandleFunc("/api/docx/import", handlers.ImportDocxHandler).Methods("POST")
+    r.HandleFunc("/api/docx/save", handlers.SaveDocxHandler).Methods("POST")
+
+
+
     // // PDF Reconstruction (Export)
     // r.HandleFunc("/api/pdf/reconstruct", handlers.ReconstructPdfHandler).Methods("POST")
      // Payment routes

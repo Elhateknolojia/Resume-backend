@@ -9,10 +9,12 @@ import (
     "os"
     "time"
     "Backend/db"
+        "context"
     "log"
     "Backend/auth"
     "Backend/models"
     "gopkg.in/gomail.v2"
+    "github.com/mailgun/mailgun-go/v4"
 "github.com/sendgrid/sendgrid-go"
     "github.com/sendgrid/sendgrid-go/helpers/mail"
 )
@@ -24,6 +26,37 @@ func generateOTP() string {
 }
 
 func sendEmailOTP(to string, otp string) error {
+    domain := os.Getenv("MAILGUN_DOMAIN")
+    apiKey := os.Getenv("MAILGUN_API_KEY")
+
+    mg := mailgun.NewMailgun(domain, apiKey)
+
+    subject := "Your Verification Code"
+    body := fmt.Sprintf("Your OTP code is: %s. It expires in 10 minutes.", otp)
+
+    message := mailgun.NewMessage(
+        "Resume App <no-reply@"+domain+">",
+        subject,
+        body,
+        to,
+    )
+
+    ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+    defer cancel()
+
+    resp, id, err := mg.Send(ctx, message)
+    if err != nil {
+        log.Printf("Mailgun error: %v", err)
+        return err
+    }
+    log.Printf("Mailgun accepted message ID: %s, response: %s", id, resp)
+    return nil
+}
+
+
+
+
+func sendEmailOTPUSINGSENDGRID(to string, otp string) error {
     from := mail.NewEmail("Resume App", os.Getenv("SMTP_USER"))
     subject := "Your Verification Code"
     plainTextContent := fmt.Sprintf("Your OTP code is: %s. It expires in 10 minutes.", otp)

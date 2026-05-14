@@ -2,11 +2,19 @@ package handlers
 
 import (
     // "Backend/models"
-    "log"
-    "bytes"
-    "encoding/json"
+    // "log"
+    // "bytes"
+    // "encoding/json"
     "io"
+    // "net/http"
+    
+    "encoding/json"
     "net/http"
+    "os"
+    "bytes"
+    "io/ioutil"
+    "log"
+
 	
 )
 
@@ -30,22 +38,81 @@ func ProcessPdfTextHandler(w http.ResponseWriter, r *http.Request) {
     io.Copy(w, resp.Body)
 }
 
-// Generate cover letter
-func GenerateCoverLetterHandler(w http.ResponseWriter, r *http.Request) {
-    var req struct {
-        ResumeContent string `json:"resumeContent"`
-        Model         string `json:"model"`
-    }
-    json.NewDecoder(r.Body).Decode(&req)
 
-    body, _ := json.Marshal(req)
-    resp, err := http.Post("https://godtekllm.onrender.com/coverletter/generate", "application/json", bytes.NewBuffer(body))
+type CoverLetterRequest struct {
+    ResumeContent string `json:"resumeContent"`
+    JobDetails    string `json:"jobDetails"`
+    Template      string `json:"template"`
+}
+
+type GPTRequest struct {
+    Model    string        `json:"model"`
+    Messages []GPTMessage  `json:"messages"`
+    MaxTokens int          `json:"max_tokens"`
+    Temperature float64    `json:"temperature"`
+}
+
+type GPTMessage struct {
+    Role    string `json:"role"`
+    Content string `json:"content"`
+}
+
+type GPTResponse struct {
+    Choices []struct {
+        Message GPTMessage `json:"message"`
+    } `json:"choices"`
+}
+
+func GenerateCoverLetterHandler(w http.ResponseWriter, r *http.Request) {
+    var req CoverLetterRequest
+    if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+        http.Error(w, "Invalid request", http.StatusBadRequest)
+        return
+    }
+
+    // Build prompt
+    prompt := "You are an expert career assistant. Write a professional cover letter using:\n" +
+        "- Resume content: " + req.ResumeContent + "\n" +
+        "- Job details: " + req.JobDetails + "\n" +
+        "- Template style: " + req.Template + "\n" +
+        "Ensure the letter is ATS-friendly, personalized, and aligned with the job description."
+
+    gptReq := GPTRequest{
+        Model: "gpt-5.0",
+        Messages: []GPTMessage{
+            {Role: "user", Content: prompt},
+        },
+        MaxTokens: 800,
+        Temperature: 0.7,
+    }
+
+    body, _ := json.Marshal(gptReq)
+
+    // Call GPT-5.0 API
+    apiKey := os.Getenv("OPENAI_API_KEY")
+    client := &http.Client{}
+    request, _ := http.NewRequest("POST", "https://api.openai.com/v1/chat/completions", bytes.NewBuffer(body))
+    request.Header.Set("Content-Type", "application/json")
+    request.Header.Set("Authorization", "Bearer "+apiKey)
+
+    resp, err := client.Do(request)
     if err != nil {
-        http.Error(w, "Cover Letter AI service error", http.StatusInternalServerError)
+        http.Error(w, "AI service unavailable", http.StatusInternalServerError)
         return
     }
     defer resp.Body.Close()
-    io.Copy(w, resp.Body)
+
+    respBody, _ := ioutil.ReadAll(resp.Body)
+
+    var gptResp GPTResponse
+    if err := json.Unmarshal(respBody, &gptResp); err != nil {
+        http.Error(w, "Invalid AI response", http.StatusInternalServerError)
+        return
+    }
+
+    // Return cover letter
+    result := map[string]string{"coverLetter": gptResp.Choices[0].Message.Content}
+    json.NewEncoder(w).Encode(result)
 }
 
 // Save blueprint

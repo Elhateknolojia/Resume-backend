@@ -21,13 +21,17 @@ func GetAdminByEmail(email string) (models.Admin, error) {
 func GetStats() map[string]interface{} {
     usersCount := CountUsers()
     adminsCount := CountAdmins()
-    premiumCount := CountByTier("premium")
     freeCount := CountByTier("free")
+    premiumCount := CountByTier("premium")
+    yearlyCount := CountByTier("1y")
+    monthlyCount := CountByTier("1m")
 
     return map[string]interface{}{
         "users":   usersCount,
         "admins":  adminsCount,
-        "premium": premiumCount,
         "free":    freeCount,
+        "premium": premiumCount,
+        "yearly":  yearlyCount,
+        "monthly": monthlyCount,
     }
 }
