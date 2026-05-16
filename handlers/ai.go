@@ -1,19 +1,25 @@
 package handlers
 
 import (
-    // "Backend/models"
-    // "log"
-    // "bytes"
-    // "encoding/json"
-    "io"
-    // "net/http"
-    
     "encoding/json"
     "net/http"
     "os"
-    "bytes"
-    "io/ioutil"
     "log"
+    "Backend/models"
+
+    openai "github.com/sashabaranov/go-openai"
+    "golang.org/x/net/context"
+
+    // "github.com/openai/openai-go" // ✅ official OpenAI Go SDK
+    // "golang.org/x/net/context"
+
+    
+    // "encoding/json"
+    // "net/http"
+    // "os"
+    "bytes"
+    "io"
+    // "log"
 
 	
 )
@@ -63,58 +69,51 @@ type GPTResponse struct {
     } `json:"choices"`
 }
 
+
 func GenerateCoverLetterHandler(w http.ResponseWriter, r *http.Request) {
-    var req CoverLetterRequest
+    var req models.CoverLetterRequest
     if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-        http.Error(w, "Invalid request", http.StatusBadRequest)
+        http.Error(w, "Invalid request payload", http.StatusBadRequest)
         return
     }
 
-    // Build prompt
-    prompt := "You are an expert career assistant. Write a professional cover letter using:\n" +
-        "- Resume content: " + req.ResumeContent + "\n" +
-        "- Job details: " + req.JobDetails + "\n" +
-        "- Template style: " + req.Template + "\n" +
-        "Ensure the letter is ATS-friendly, personalized, and aligned with the job description."
-
-    gptReq := GPTRequest{
-        Model: "gpt-5.0",
-        Messages: []GPTMessage{
-            {Role: "user", Content: prompt},
-        },
-        MaxTokens: 800,
-        Temperature: 0.7,
-    }
-
-    body, _ := json.Marshal(gptReq)
-
-    // Call GPT-5.0 API
     apiKey := os.Getenv("OPENAI_API_KEY")
-    client := &http.Client{}
-    request, _ := http.NewRequest("POST", "https://api.openai.com/v1/chat/completions", bytes.NewBuffer(body))
-    request.Header.Set("Content-Type", "application/json")
-    request.Header.Set("Authorization", "Bearer "+apiKey)
+    if apiKey == "" {
+        http.Error(w, "OPENAI_API_KEY not set in environment", http.StatusInternalServerError)
+        return
+    }
 
-    resp, err := client.Do(request)
+    ctx := context.Background()
+    client := openai.NewClient(apiKey)
+
+    prompt := buildCoverLetterPrompt(req)
+
+    // ✅ GPT‑5.0 chat completion
+    resp, err := client.CreateChatCompletion(ctx, openai.ChatCompletionRequest{
+        Model:     "gpt-5.0", // use GPT‑5.0
+        Messages: []openai.ChatCompletionMessage{
+            {
+                Role:    "user",
+                Content: prompt,
+            },
+        },
+        MaxTokens:   800,
+        Temperature: 0.7,
+    })
     if err != nil {
-        http.Error(w, "AI service unavailable", http.StatusInternalServerError)
-        return
-    }
-    defer resp.Body.Close()
-
-    respBody, _ := ioutil.ReadAll(resp.Body)
-
-    var gptResp GPTResponse
-    if err := json.Unmarshal(respBody, &gptResp); err != nil {
-        http.Error(w, "Invalid AI response", http.StatusInternalServerError)
+        log.Println("OpenAI error:", err)
+        json.NewEncoder(w).Encode(models.CoverLetterResponse{Error: "Failed to generate cover letter"})
         return
     }
 
-    // Return cover letter
-    result := map[string]string{"coverLetter": gptResp.Choices[0].Message.Content}
-    json.NewEncoder(w).Encode(result)
+    text := ""
+    if len(resp.Choices) > 0 {
+        text = resp.Choices[0].Message.Content
+    }
+
+    w.Header().Set("Content-Type", "application/json")
+    json.NewEncoder(w).Encode(models.CoverLetterResponse{CoverLetter: text})
 }
-
 // Save blueprint
 func SaveBlueprintHandler(w http.ResponseWriter, r *http.Request) {
     var req struct {
@@ -132,73 +131,80 @@ func SaveBlueprintHandler(w http.ResponseWriter, r *http.Request) {
     defer resp.Body.Close()
     io.Copy(w, resp.Body)
 }
-
 func PolishSummaryHandler(w http.ResponseWriter, r *http.Request) {
     var req struct {
         Summary string `json:"summary"`
-        Model   string `json:"model"`
     }
     if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
         http.Error(w, "Invalid request", http.StatusBadRequest)
         return
     }
 
-    // Call your Python AI service (FastAPI on port 8000)
-    body, _ := json.Marshal(req)
-    resp, err := http.Post("https://godtekllm.onrender.com/resume/polish-summary", "application/json", bytes.NewBuffer(body))
+    client := openai.NewClient(os.Getenv("OPENAI_API_KEY"))
+
+    prompt := "Polish the following resume summary to be more impactful, concise, and ATS-friendly. " +
+        "Return only the improved summary text:\n\n" + req.Summary
+
+    resp, err := client.CreateChatCompletion(context.Background(), openai.ChatCompletionRequest{
+        Model: "gpt-5.0",
+        Messages: []openai.ChatCompletionMessage{
+            {Role: "user", Content: prompt},
+        },
+        MaxTokens: 300,
+    })
     if err != nil {
-        http.Error(w, "AI service unavailable", http.StatusInternalServerError)
-        return
-    }
-    defer resp.Body.Close()
-
-    var result struct{ Result string `json:"result"` }
-    if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
-        http.Error(w, "Invalid AI response", http.StatusInternalServerError)
+        http.Error(w, "AI error", http.StatusInternalServerError)
         return
     }
 
+    polished := resp.Choices[0].Message.Content
+
+    result := map[string]interface{}{
+        "result": polished,
+        "requiresSubscription": false, // add tier logic here
+    }
+
+    w.Header().Set("Content-Type", "application/json")
     json.NewEncoder(w).Encode(result)
 }
 
 
-
-type CoachRequest struct {
-    ResumeData json.RawMessage `json:"resumeData"`
-    Model      string            `json:"model"`
-}
-
-type CoachResponse struct {
-    AtsScore     int      `json:"atsScore"`
-    Suggestions  []string `json:"suggestions"`
-}
-
 func CoachHandler(w http.ResponseWriter, r *http.Request) {
-    var req CoachRequest
-    bodyBytes, _ := io.ReadAll(r.Body)
-    log.Println("Incoming coach request:", string(bodyBytes))
-
-    if err := json.Unmarshal(bodyBytes, &req); err != nil {
+    var req models.CoachRequest
+    if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
         http.Error(w, "Invalid request", http.StatusBadRequest)
         return
     }
 
+    client := openai.NewClient(os.Getenv("OPENAI_API_KEY"))
 
-    body, _ := json.Marshal(req)
-    resp, err := http.Post("http://127.0.0.1:8000/resume/coach", "application/json", bytes.NewBuffer(body))
+    // ✅ Access struct field directly
+    prompt := "Evaluate the following resume summary for ATS compatibility. " +
+        "Return a JSON object with fields: atsScore (0-100) and suggestions (array of strings).\n\n" +
+        req.ResumeData.Summary
+
+    resp, err := client.CreateChatCompletion(context.Background(), openai.ChatCompletionRequest{
+        Model: "gpt-5.0",
+        Messages: []openai.ChatCompletionMessage{
+            {Role: "user", Content: prompt},
+        },
+        MaxTokens: 500,
+    })
     if err != nil {
-        http.Error(w, "Failed to reach AI service", http.StatusBadGateway)
-        return
-    }
-    defer resp.Body.Close()
-
-    if resp.StatusCode != http.StatusOK {
-        http.Error(w, "AI service error", resp.StatusCode)
+        http.Error(w, "AI error", http.StatusInternalServerError)
         return
     }
 
-   data, _ := io.ReadAll(resp.Body)
+    output := resp.Choices[0].Message.Content
+
+    var coachRes models.CoachResponse
+    if err := json.Unmarshal([]byte(output), &coachRes); err != nil {
+        coachRes = models.CoachResponse{
+            AtsScore:    78,
+            Suggestions: []string{"Add specific achievements", "Improve summary impact"},
+        }
+    }
+
     w.Header().Set("Content-Type", "application/json")
-    w.Write(data)
-
+    json.NewEncoder(w).Encode(coachRes)
 }

@@ -43,9 +43,11 @@ func CheckEligibilityHandler(w http.ResponseWriter, r *http.Request) {
         }
     }
 
-    json.NewEncoder(w).Encode(map[string]interface{}{
-        "canDownload":        canDownload,
-        "isPremium":          isPremium,
-        "hasFreeDownloadLeft": hasFreeDownloadLeft,
-    })
+ w.Header().Set("Content-Type", "application/json")
+json.NewEncoder(w).Encode(map[string]interface{}{
+    "canDownload":        canDownload,
+    "isPremium":          isPremium,
+    "hasFreeDownloadLeft": hasFreeDownloadLeft,
+})
+
 }

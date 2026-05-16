@@ -1,5 +1,9 @@
 package models
 
+// import (
+// 	"encoding/json"
+// )
+
 type Referee struct {
     ID      string `json:"id"`
     Name    string `json:"name"`
@@ -102,6 +106,18 @@ type ResumeData struct {
 
     
 }
+
+type CoachRequest struct {
+    ResumeData ResumeData `json:"resumeData"`
+    Model      string     `json:"model"`
+}
+
+
+type CoachResponse struct {
+    AtsScore     int      `json:"atsScore"`
+    Suggestions  []string `json:"suggestions"`
+}
+
 
 
 type Education struct {

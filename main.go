@@ -104,6 +104,7 @@ func main() {
 
     // User routes
     r.Handle("/api/user", middleware.AuthMiddleware(http.HandlerFunc(handlers.GetUserHandler))).Methods("GET")
+    r.Handle("/api/resume/me", middleware.AuthMiddleware(http.HandlerFunc(handlers.GetResumeHandler))).Methods("GET")
 
 
     // Protected routes
@@ -114,7 +115,7 @@ func main() {
 	r.Handle("/api/resume/generate-pdf", middleware.AuthMiddleware(http.HandlerFunc(handlers.GeneratePdfHandler))).Methods("POST")
     r.HandleFunc("/api/resume/save-pending", handlers.SavePendingResumeHandler).Methods("POST")
 
-	r.Handle("/api/coverletter/download", middleware.AuthMiddleware(middleware.PremiumOnly(http.HandlerFunc(handlers.DownloadCoverLetterHandler)))).Methods("GET")
+	// r.Handle("/api/coverletter/download", middleware.AuthMiddleware(middleware.PremiumOnly(http.HandlerFunc(handlers.DownloadCoverLetterHandler)))).Methods("GET")
 
 corsHandler := ghandlers.CORS(
     ghandlers.AllowedOrigins([]string{
