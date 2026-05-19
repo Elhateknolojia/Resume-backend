@@ -50,6 +50,12 @@ func main() {
 
 
     r := mux.NewRouter()
+
+
+    // Handle OPTIONS requests globally
+    r.Methods(http.MethodOptions).HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+        w.WriteHeader(http.StatusOK)
+    })
     // Public routes
     // r.HandleFunc("/api/pdf/import", handlers.ImportPdfHandler).Methods("POST")
     // PDF routes
@@ -115,6 +121,7 @@ func main() {
 	r.Handle("/api/resume/generate-pdf", middleware.AuthMiddleware(http.HandlerFunc(handlers.GeneratePdfHandler))).Methods("POST")
     r.HandleFunc("/api/resume/save-pending", handlers.SavePendingResumeHandler).Methods("POST")
 
+    
 	// r.Handle("/api/coverletter/download", middleware.AuthMiddleware(middleware.PremiumOnly(http.HandlerFunc(handlers.DownloadCoverLetterHandler)))).Methods("GET")
 
 corsHandler := ghandlers.CORS(
@@ -127,7 +134,7 @@ corsHandler := ghandlers.CORS(
         "https://resumebuilder-pdfeditor.onrender.com",
         "https://coverletter-1-sbiz.onrender.com",
         "https://resume-backend-plmv.onrender.com",
-        "https://resume-backend-weld.vercel.app/",
+        // "https://resume-backend-weld.vercel.app/",
         // "*",/ // Allow all origins (for development, be cautious in production)
     }),
     ghandlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}),
