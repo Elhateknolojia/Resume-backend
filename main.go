@@ -124,6 +124,7 @@ corsHandler := ghandlers.CORS(
         "http://localhost:2000",
         "http://localhost:3000",              // if you test on 3000
         "https://resume-six-dun.vercel.app",
+        "https://resume-backend-weld.vercel.app/",
         // "*",/ // Allow all origins (for development, be cautious in production)
     }),
     ghandlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}),

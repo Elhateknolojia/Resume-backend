@@ -2,35 +2,44 @@ package db
 
 import (
     "context"
+    "time"
 
     "Backend/models"
     "go.mongodb.org/mongo-driver/bson"
-    
 )
 
+// Get user by email with timeout
 func GetUserByEmail(email string) (*models.User, error) {
+    ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+    defer cancel()
+
     var user models.User
-    err := UserCollection.FindOne(context.TODO(), bson.M{"email": email}).Decode(&user)
+    err := UserCollection.FindOne(ctx, bson.M{"email": email}).Decode(&user)
     if err != nil {
         return nil, err
     }
     return &user, nil
 }
 
-
+// Get user by ID with timeout
 func GetUserByID(id string) (*models.User, error) {
+    ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+    defer cancel()
+
     var user models.User
-    err := UserCollection.FindOne(context.TODO(), bson.M{"_id": id}).Decode(&user)
+    err := UserCollection.FindOne(ctx, bson.M{"_id": id}).Decode(&user)
     if err != nil {
         return nil, err
     }
     return &user, nil
 }
-
 
 // Count all users
 func CountUsers() int64 {
-    count, err := UserCollection.CountDocuments(context.TODO(), bson.M{})
+    ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+    defer cancel()
+
+    count, err := UserCollection.CountDocuments(ctx, bson.M{})
     if err != nil {
         return 0
     }
@@ -39,7 +48,10 @@ func CountUsers() int64 {
 
 // Count all admins
 func CountAdmins() int64 {
-    count, err := UserCollection.CountDocuments(context.TODO(), bson.M{"isAdmin": true})
+    ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+    defer cancel()
+
+    count, err := UserCollection.CountDocuments(ctx, bson.M{"isAdmin": true})
     if err != nil {
         return 0
     }
@@ -48,9 +60,13 @@ func CountAdmins() int64 {
 
 // Count users by tier (e.g. "free", "premium")
 func CountByTier(tier string) int64 {
-    count, err := UserCollection.CountDocuments(context.TODO(), bson.M{"tier": tier})
+    ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+    defer cancel()
+
+    count, err := UserCollection.CountDocuments(ctx, bson.M{"tier": tier})
     if err != nil {
         return 0
     }
     return count
 }
+    
