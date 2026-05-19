@@ -10,7 +10,7 @@ import (
 
 // Get user by email with timeout
 func GetUserByEmail(email string) (*models.User, error) {
-    ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+    ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
     defer cancel()
 
     var user models.User
@@ -23,7 +23,7 @@ func GetUserByEmail(email string) (*models.User, error) {
 
 // Get user by ID with timeout
 func GetUserByID(id string) (*models.User, error) {
-    ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+    ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
     defer cancel()
 
     var user models.User
@@ -36,7 +36,7 @@ func GetUserByID(id string) (*models.User, error) {
 
 // Count all users
 func CountUsers() int64 {
-    ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+    ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
     defer cancel()
 
     count, err := UserCollection.CountDocuments(ctx, bson.M{})
@@ -48,7 +48,7 @@ func CountUsers() int64 {
 
 // Count all admins
 func CountAdmins() int64 {
-    ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+    ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
     defer cancel()
 
     count, err := UserCollection.CountDocuments(ctx, bson.M{"isAdmin": true})
