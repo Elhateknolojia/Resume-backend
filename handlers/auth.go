@@ -123,6 +123,9 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
     }
     log.Printf("[Login] Password verification in %s", time.Since(hashStart))
 
+    log.Printf("[Login] raw=%s, transformed=%s, stored=%s",
+    creds.Password, auth.HashPassword(creds.Password), user.Password)
+
     // ⏱ Token generation
     tokenStart := time.Now()
     token, err := middleware.GenerateToken(user.ID)
