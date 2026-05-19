@@ -81,7 +81,7 @@ func SignupHandler(w http.ResponseWriter, r *http.Request) {
 json.NewEncoder(w).Encode(map[string]string{"message": "OTP sent"})
 }
 
-// LoginHandler: verify password by re-transforming input
+// LoginHandler: verify password by re-transforming input// LoginHandler: verify password by re-transforming input
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
     start := time.Now()
     var creds struct {
@@ -89,51 +89,63 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
         Password string `json:"password"`
     }
 
-    log.Printf("Decode login request in %s", time.Since(start))
+    // ⏱ Decode request
     if err := json.NewDecoder(r.Body).Decode(&creds); err != nil {
         http.Error(w, "Invalid request", http.StatusBadRequest)
         return
     }
+    log.Printf("[Login] Decode request in %s", time.Since(start))
 
-
-    dbSart := time.Now()
+    // ⏱ DB lookup
+    dbStart := time.Now()
     user, err := db.GetUserByEmail(creds.Email)
-    log.Printf("DB lookup in %s", time.Since(dbSart))
+    log.Printf("[Login] DB lookup in %s", time.Since(dbStart))
 
-    hashStart := time.Now()
-    if err != nil || !auth.CheckPasswordHash(creds.Password, user.Password) {
+    if err != nil || user == nil {
         w.WriteHeader(http.StatusUnauthorized)
         json.NewEncoder(w).Encode(map[string]string{
-            "error":   "Invalid email or password",
-            "message": "Please check your credentials and try again",
+            "error":   "Email mismatch",
+            "message": "No account found with that email",
         })
         return
     }
-    log.Printf("Password verification in %s", time.Since(hashStart))
 
+    // ⏱ Password check
+    hashStart := time.Now()
+    if !auth.CheckPasswordHash(creds.Password, user.Password) {
+        log.Printf("[Login] Password verification in %s", time.Since(hashStart))
+        w.WriteHeader(http.StatusUnauthorized)
+        json.NewEncoder(w).Encode(map[string]string{
+            "error":   "Password mismatch",
+            "message": "The password you entered is incorrect",
+        })
+        return
+    }
+    log.Printf("[Login] Password verification in %s", time.Since(hashStart))
 
+    // ⏱ Token generation
     tokenStart := time.Now()
     token, err := middleware.GenerateToken(user.ID)
     if err != nil {
         http.Error(w, "Could not generate token", http.StatusInternalServerError)
         return
     }
-    log.Printf("Token generation in %s", time.Since(tokenStart))
+    log.Printf("[Login] Token generation in %s", time.Since(tokenStart))
 
+    // ✅ Success response
+    resp := map[string]interface{}{
+        "token":          token,
+        "userId":         user.ID,
+        "email":          user.Email,
+        "isAdmin":        user.IsAdmin,
+        "tier":           user.Tier,
+        "passwordStatus": "Password is a match",
+    }
 
-            resp := models.LoginResponse{
-                Token:   token,
-                UserID:  user.ID,
-                Email:   user.Email,
-                IsAdmin: user.IsAdmin,
-                Tier:    user.Tier,
-            }
+    w.Header().Set("Content-Type", "application/json")
+    json.NewEncoder(w).Encode(resp)
+}
 
-            w.Header().Set("Content-Type", "application/json")
-            json.NewEncoder(w).Encode(resp)
-
-
-            }
 
 
 func RefreshHandler(w http.ResponseWriter, r *http.Request) {
