@@ -34,12 +34,13 @@ func InitiatePaymentHandler(w http.ResponseWriter, r *http.Request) {
     }
 
     // Paystack expects amount in kobo (KES cents)
-    payload := map[string]interface{}{
+payload := map[string]interface{}{
     "email": req.Email,
     "amount": req.Amount * 100,
-    "callback_url": fmt.Sprintf("http://localhost:3000/payment/callback?tierId=%s", req.TierId),
+    "callback_url": fmt.Sprintf("https://resume.elitesuites.top/payment/?tierId=%s&email=%s", req.TierId, req.Email),
     "metadata": map[string]string{
         "tierId": req.TierId,
+        "email":  req.Email,
     },
 }
 
