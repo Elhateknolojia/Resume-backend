@@ -131,6 +131,8 @@ corsHandler := ghandlers.CORS(
         // "http://localhost:2000",
         // "http://localhost:3000",              // if you test on 3000
          "https://resume.elitesuites.top",
+         "https://www.elitesuites.top",
+         "https://elitesuites.top",
         "https://pdfeditor.elitesuites.top",
         "https://coverletter.elitesuites.top",
         "https://jobsearch.elitesuites.top",
