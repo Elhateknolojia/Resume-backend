@@ -133,6 +133,7 @@ corsHandler := ghandlers.CORS(
          "https://resume.elitesuites.top",
         "https://pdfeditor.elitesuites.top",
         "https://coverletter.elitesuites.top",
+        "https://jobsearch.elitesuites.top",
         "https://resume-six-dun.vercel.app",
         "https://resumebuilder-pdfeditor.onrender.com",
         "https://coverletter-1-sbiz.onrender.com",
