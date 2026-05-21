@@ -3,7 +3,7 @@ package db
 import (
     "context"
     "time"
-
+    "log"
     "Backend/models"
     "go.mongodb.org/mongo-driver/bson"
 )
@@ -39,12 +39,19 @@ func CountUsers() int64 {
     ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
     defer cancel()
 
+    if UserCollection == nil {
+        log.Println("ERROR: UserCollection is nil")
+        return 0
+    }
+
     count, err := UserCollection.CountDocuments(ctx, bson.M{})
     if err != nil {
+        log.Println("CountUsers error:", err)
         return 0
     }
     return count
 }
+
 
 // Count all admins
 func CountAdmins() int64 {
