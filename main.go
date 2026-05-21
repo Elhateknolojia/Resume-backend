@@ -33,13 +33,14 @@ func main() {
     if err != nil {
         log.Println("Warning: .env file not found, relying on system environment variables")
     }
-
+        
     mongoURI := os.Getenv("MONGO_URI")
+    log.Printf("DEBUG MONGO_URI: [%s]", mongoURI)
     if mongoURI == "" {
         log.Fatal("MONGO_URI not set in environment")
     }
-
     db.InitDB(mongoURI, "resumeDB", "users", "userinputs", "admin", "local")
+
     // in main.go
     // Replace this line:
 // http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
