@@ -21,27 +21,28 @@ func StatsHandler(w http.ResponseWriter, r *http.Request) {
 
     userCollection := db.Client.Database("resumeDB").Collection("users")
 
-    // Count all non-admin users
+    // Count non-admin users
     userCount, err := userCollection.CountDocuments(ctx, bson.M{"isAdmin": false})
     if err != nil {
-        http.Error(w, err.Error(), http.StatusInternalServerError)
+        http.Error(w, "Error counting users: "+err.Error(), http.StatusInternalServerError)
         return
     }
 
-    // Example: job placements derived from resumes with experience entries
-    resumeCollection := db.Client.Database("resumeDB").Collection("resumes")
-    jobCount, err := resumeCollection.CountDocuments(ctx, bson.M{"experience.0": bson.M{"$exists": true}})
+    // Count job placements: users with at least one experience entry
+    jobCount, err := userCollection.CountDocuments(ctx, bson.M{
+        "isAdmin": false,
+        "resumeData.experience": bson.M{"$ne": nil},
+    })
     if err != nil {
-        http.Error(w, err.Error(), http.StatusInternalServerError)
+        http.Error(w, "Error counting job placements: "+err.Error(), http.StatusInternalServerError)
         return
     }
 
     stats := Stats{
-        ActiveUsers:   int(userCount) + 10000, // offset
-        JobPlacements: int(jobCount) + 1000,   // offset
+        ActiveUsers:   int(userCount) + 10000,
+        JobPlacements: int(jobCount) + 1000,
     }
 
     w.Header().Set("Content-Type", "application/json")
     json.NewEncoder(w).Encode(stats)
 }
-
