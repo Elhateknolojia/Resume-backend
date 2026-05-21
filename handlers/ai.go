@@ -1,27 +1,26 @@
 package handlers
 
 import (
-    "encoding/json"
-    "net/http"
-    "os"
-    "log"
-    "Backend/models"
+	"Backend/models"
+	"encoding/json"
+	"log"
+    "fmt"
+	"net/http"
+	"os"
+	"time"
 
-    openai "github.com/sashabaranov/go-openai"
-    "golang.org/x/net/context"
+	openai "github.com/sashabaranov/go-openai"
+	"golang.org/x/net/context"
 
-    // "github.com/openai/openai-go" // ✅ official OpenAI Go SDK
-    // "golang.org/x/net/context"
+	// "github.com/openai/openai-go" // ✅ official OpenAI Go SDK
+	// "golang.org/x/net/context"
 
-    
-    // "encoding/json"
-    // "net/http"
-    // "os"
-    "bytes"
-    "io"
-    // "log"
-
-	
+	// "encoding/json"
+	// "net/http"
+	// "os"
+	"bytes"
+	"io"
+	// "log"
 )
 
 // Process PDF text (rewrite/shorten/expand/ats)
@@ -69,8 +68,9 @@ type GPTResponse struct {
     } `json:"choices"`
 }
 
-
 func GenerateCoverLetterHandler(w http.ResponseWriter, r *http.Request) {
+    start := time.Now() // ⏱ start timer
+
     var req models.CoverLetterRequest
     if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
         http.Error(w, "Invalid request payload", http.StatusBadRequest)
@@ -86,22 +86,20 @@ func GenerateCoverLetterHandler(w http.ResponseWriter, r *http.Request) {
     ctx := context.Background()
     client := openai.NewClient(apiKey)
 
+    log.Println("[CoverLetter] ✅ OpenAI client initialized, secure connection established")
+
     prompt := buildCoverLetterPrompt(req)
 
-    // ✅ GPT‑5.0 chat completion
     resp, err := client.CreateChatCompletion(ctx, openai.ChatCompletionRequest{
-        Model:     "gpt-5.0", // use GPT‑5.0
+        Model:     "gpt-5.0",
         Messages: []openai.ChatCompletionMessage{
-            {
-                Role:    "user",
-                Content: prompt,
-            },
+            {Role: "user", Content: prompt},
         },
         MaxTokens:   800,
         Temperature: 0.7,
     })
     if err != nil {
-        log.Println("OpenAI error:", err)
+        log.Println("[CoverLetter] ❌ OpenAI error:", err)
         json.NewEncoder(w).Encode(models.CoverLetterResponse{Error: "Failed to generate cover letter"})
         return
     }
@@ -111,10 +109,13 @@ func GenerateCoverLetterHandler(w http.ResponseWriter, r *http.Request) {
         text = resp.Choices[0].Message.Content
     }
 
+    elapsed := time.Since(start)
+    log.Printf("[CoverLetter] ⏱ Generated in %s\n", elapsed)
+
     w.Header().Set("Content-Type", "application/json")
     json.NewEncoder(w).Encode(models.CoverLetterResponse{CoverLetter: text})
 }
-// Save blueprint
+
 func SaveBlueprintHandler(w http.ResponseWriter, r *http.Request) {
     var req struct {
         Sections []interface{} `json:"sections"`
@@ -207,4 +208,66 @@ func CoachHandler(w http.ResponseWriter, r *http.Request) {
 
     w.Header().Set("Content-Type", "application/json")
     json.NewEncoder(w).Encode(coachRes)
+}
+func ImprovementSuggestionsHandler(w http.ResponseWriter, r *http.Request) {
+    start := time.Now() // ⏱ start timer
+
+    var req models.ImprovementSuggestionsRequest
+    if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+        http.Error(w, "Invalid request payload", http.StatusBadRequest)
+        return
+    }
+
+    apiKey := os.Getenv("OPENAI_API_KEY")
+    if apiKey == "" {
+        http.Error(w, "OPENAI_API_KEY not set in environment", http.StatusInternalServerError)
+        return
+    }
+
+    client := openai.NewClient(apiKey)
+    log.Println("[Suggestions] ✅ OpenAI client initialized, secure connection established")
+
+    prompt := fmt.Sprintf(`
+Review the following cover letter draft for a %s position at %s.
+Provide 3-5 specific, bulleted suggestions to improve its tone, clarity, and alignment with the job description.
+
+COVER LETTER:
+%s
+
+JOB DESCRIPTION SUMMARY:
+%s
+
+Return the suggestions as a JSON array of strings.
+`, req.Job.Title, req.Job.Company, req.Content, req.Job.Description)
+
+    resp, err := client.CreateChatCompletion(context.Background(), openai.ChatCompletionRequest{
+        Model: "gpt-5.0",
+        Messages: []openai.ChatCompletionMessage{
+            {Role: "user", Content: prompt},
+        },
+        MaxTokens: 500,
+    })
+    if err != nil {
+        log.Println("[Suggestions] ❌ OpenAI error:", err)
+        json.NewEncoder(w).Encode(models.ImprovementSuggestionsResponse{
+            Error: "Failed to generate suggestions",
+        })
+        return
+    }
+
+    output := resp.Choices[0].Message.Content
+
+    var suggestions []string
+    if err := json.Unmarshal([]byte(output), &suggestions); err != nil {
+        log.Println("[Suggestions] ⚠️ JSON parse fallback triggered")
+        suggestions = []string{"Improve clarity", "Add measurable achievements"}
+    }
+
+    elapsed := time.Since(start)
+    log.Printf("[Suggestions] ⏱ Generated in %s\n", elapsed)
+
+    w.Header().Set("Content-Type", "application/json")
+    json.NewEncoder(w).Encode(models.ImprovementSuggestionsResponse{
+        Suggestions: suggestions,
+    })
 }

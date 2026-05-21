@@ -113,6 +113,10 @@ func main() {
     r.Handle("/api/resume/me", middleware.AuthMiddleware(http.HandlerFunc(handlers.GetResumeHandler))).Methods("GET")
 
 
+    r.HandleFunc("/coverletter/generate", handlers.GenerateCoverLetterHandler).Methods("POST")
+    r.HandleFunc("/coverletter/suggestions", handlers.ImprovementSuggestionsHandler).Methods("POST")
+
+
     // Protected routes
     r.Handle("/api/profile", middleware.AuthMiddleware(http.HandlerFunc(handlers.ProfileHandler))).Methods("GET", "PUT")
     r.Handle("/api/userinput", middleware.AuthMiddleware(middleware.RateLimitMiddleware(http.HandlerFunc(handlers.UserInputHandler)))).Methods("POST")
