@@ -84,6 +84,7 @@ func main() {
 
     r.HandleFunc("/api/admin/stats", handlers.AdminStatsHandler).Methods("GET")
 
+    r.HandleFunc("/plans", handlers.PlansHandler).Methods("GET")
 
 	r.Handle("/api/resume/check-eligibility", middleware.AuthMiddleware(http.HandlerFunc(handlers.CheckEligibilityHandler))).Methods("POST")
     r.Handle("/api/resume/export-html", middleware.AuthMiddleware(http.HandlerFunc(handlers.ExportHtmlHandler))).Methods("POST")
