@@ -20,12 +20,15 @@ func StatsHandler(w http.ResponseWriter, r *http.Request) {
     defer cancel()
 
     userCollection := db.Client.Database("resumeDB").Collection("users")
-    userCount, err := userCollection.CountDocuments(ctx, bson.M{})
+
+    // Count all non-admin users
+    userCount, err := userCollection.CountDocuments(ctx, bson.M{"isAdmin": false})
     if err != nil {
         http.Error(w, err.Error(), http.StatusInternalServerError)
         return
     }
 
+    // Example: job placements derived from resumes with experience entries
     resumeCollection := db.Client.Database("resumeDB").Collection("resumes")
     jobCount, err := resumeCollection.CountDocuments(ctx, bson.M{"experience.0": bson.M{"$exists": true}})
     if err != nil {
@@ -34,10 +37,11 @@ func StatsHandler(w http.ResponseWriter, r *http.Request) {
     }
 
     stats := Stats{
-        ActiveUsers:   int(userCount) + 10000,
-        JobPlacements: int(jobCount) + 1000,
+        ActiveUsers:   int(userCount) + 10000, // offset
+        JobPlacements: int(jobCount) + 1000,   // offset
     }
 
     w.Header().Set("Content-Type", "application/json")
     json.NewEncoder(w).Encode(stats)
 }
+
