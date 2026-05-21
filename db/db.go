@@ -10,7 +10,7 @@ import (
     "go.mongodb.org/mongo-driver/mongo/options" // ✅ this is required
 )
 
-var client *mongo.Client
+var Client *mongo.Client
 var UserCollection *mongo.Collection
 var InputCollection *mongo.Collection
 
@@ -29,7 +29,8 @@ func InitDB(uri, dbName string, collections ...string) {
         log.Fatal(err)
     }
 
-    db := client.Database(dbName)
+    Client = client
+    db := Client.Database(dbName)
     UserCollection = db.Collection("users")
     InputCollection = db.Collection("userinputs")
 
