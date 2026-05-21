@@ -5,7 +5,7 @@ import (
     "net/http"
     "context"
     "time"
-
+	"log"
     "go.mongodb.org/mongo-driver/bson"
     "Backend/db" // ✅ import your db package
 )
@@ -34,6 +34,7 @@ func StatsHandler(w http.ResponseWriter, r *http.Request) {
         "resumeData.experience": bson.M{"$ne": nil},
     })
     if err != nil {
+		log.Println("StatsHandler error:", err)
         http.Error(w, "Error counting job placements: "+err.Error(), http.StatusInternalServerError)
         return
     }
