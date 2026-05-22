@@ -1,12 +1,13 @@
 package middleware
 
 import (
-    "context"
-    "net/http"
-    "strings"
-    "time"
+	"context"
+	"errors"
+	"net/http"
+	"strings"
+	"time"
 
-    "github.com/golang-jwt/jwt/v4"
+	"github.com/golang-jwt/jwt/v4"
 )
 
 var jwtKey = []byte("supersecretkey")
@@ -58,4 +59,19 @@ func AuthMiddleware(next http.Handler) http.Handler {
 
         next.ServeHTTP(w, r.WithContext(ctx))
     })
+}
+
+
+
+
+// ✅ Add this function
+func ValidateToken(tokenStr string) (jwt.MapClaims, error) {
+    claims := jwt.MapClaims{}
+    token, err := jwt.ParseWithClaims(tokenStr, claims, func(token *jwt.Token) (interface{}, error) {
+        return jwtKey, nil
+    })
+    if err != nil || !token.Valid {
+        return nil, errors.New("invalid token")
+    }
+    return claims, nil
 }

@@ -134,15 +134,23 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
         return
     }
     log.Printf("[Login] Token generation in %s", time.Since(tokenStart))
+ // ✅ Set JWT cookie for all subdomains
+    http.SetCookie(w, &http.Cookie{
+        Name:     "jwt",
+        Value:    token,
+        Path:     "/",
+        Domain:   ".elitesuites.top", // covers resume, jobsearch, coverletter, etc.
+        HttpOnly: true,
+        Secure:   true,
+        SameSite: http.SameSiteLaxMode,
+        Expires:  time.Now().Add(24 * time.Hour),
+    })
 
-    // ✅ Success response
+    // Also return JSON for frontend state hydration if needed
     resp := map[string]interface{}{
-        "token":          token,
-        "userId":         user.ID,
-        "email":          user.Email,
-        "isAdmin":        user.IsAdmin,
-        "tier":           user.Tier,
-        "passwordStatus": "Password is a match",
+        "email":   user.Email,
+        "isAdmin": user.IsAdmin,
+        "tier":    user.Tier,
     }
 
     w.Header().Set("Content-Type", "application/json")
@@ -177,4 +185,39 @@ func RefreshHandler(w http.ResponseWriter, r *http.Request) {
     }
 
     json.NewEncoder(w).Encode(map[string]string{"token": newToken})
+}
+
+func SessionHandler(w http.ResponseWriter, r *http.Request) {
+    cookie, err := r.Cookie("jwt")
+    if err != nil || cookie.Value == "" {
+        http.Error(w, "No session", http.StatusUnauthorized)
+        return
+    }
+
+    claims, err := middleware.ValidateToken(cookie.Value)
+    if err != nil {
+        http.Error(w, "Invalid token", http.StatusUnauthorized)
+        return
+    }
+
+    json.NewEncoder(w).Encode(map[string]interface{}{
+        "loggedIn": true,
+        "email":    claims["email"],
+        "isAdmin":  claims["isAdmin"],
+        "tier":     claims["tier"],
+    })
+}
+
+func LogoutHandler(w http.ResponseWriter, r *http.Request) {
+    http.SetCookie(w, &http.Cookie{
+        Name:     "jwt",
+        Value:    "",
+        Path:     "/",
+        Domain:   ".elitesuites.top",
+        HttpOnly: true,
+        Secure:   true,
+        Expires:  time.Unix(0, 0),
+        MaxAge:   -1,
+    })
+    w.WriteHeader(http.StatusOK)
 }
