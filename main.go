@@ -95,6 +95,8 @@ func main() {
 
     r.Handle("/api/auth/refresh", middleware.AuthMiddleware(http.HandlerFunc(handlers.RefreshHandler))).Methods("POST")
 
+    r.HandleFunc("/api/support", handlers.SupportHandler).Methods("POST")
+
 
 	// AI routes
 	r.Handle("/api/ai/process-pdf-text", middleware.AuthMiddleware(http.HandlerFunc(handlers.ProcessPdfTextHandler))).Methods("POST")

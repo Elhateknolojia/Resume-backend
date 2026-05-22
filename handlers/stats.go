@@ -15,26 +15,40 @@ type Stats struct {
     JobPlacements int `json:"jobPlacements"`
 }
 
+
 func StatsHandler(w http.ResponseWriter, r *http.Request) {
     ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
     defer cancel()
 
+    
+
+
+    if db.Client == nil {
+        http.Error(w, "Database client not initialized", http.StatusInternalServerError)
+        return
+    }
+
     userCollection := db.Client.Database("resumeDB").Collection("users")
+    if userCollection == nil {
+        http.Error(w, "Users collection not found", http.StatusInternalServerError)
+        return
+    }
 
     // Count non-admin users
     userCount, err := userCollection.CountDocuments(ctx, bson.M{"isAdmin": false})
     if err != nil {
+        log.Println("Error counting users:", err)
         http.Error(w, "Error counting users: "+err.Error(), http.StatusInternalServerError)
         return
     }
 
-    // Count job placements: users with at least one experience entry
+    // Count job placements
     jobCount, err := userCollection.CountDocuments(ctx, bson.M{
         "isAdmin": false,
-        "resumeData.experience": bson.M{"$ne": nil},
+        "resumeData.experience": bson.M{"$exists": true, "$ne": nil},
     })
     if err != nil {
-		log.Println("StatsHandler error:", err)
+        log.Println("Error counting job placements:", err)
         http.Error(w, "Error counting job placements: "+err.Error(), http.StatusInternalServerError)
         return
     }
@@ -45,5 +59,8 @@ func StatsHandler(w http.ResponseWriter, r *http.Request) {
     }
 
     w.Header().Set("Content-Type", "application/json")
-    json.NewEncoder(w).Encode(stats)
+    if err := json.NewEncoder(w).Encode(stats); err != nil {
+        log.Println("Error encoding stats:", err)
+        http.Error(w, "Error encoding stats", http.StatusInternalServerError)
+    }
 }

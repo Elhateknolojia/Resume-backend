@@ -4,7 +4,7 @@ import (
     "context"
     "time"
     "log"
-    
+
     "go.mongodb.org/mongo-driver/bson"
     "go.mongodb.org/mongo-driver/mongo"
     "go.mongodb.org/mongo-driver/mongo/options" // ✅ this is required
@@ -14,19 +14,25 @@ var Client *mongo.Client
 var UserCollection *mongo.Collection
 var InputCollection *mongo.Collection
 
+
 func InitDB(uri, dbName string, collections ...string) {
     ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
     defer cancel()
 
     clientOpts := options.Client().
         ApplyURI(uri).
-        SetMaxPoolSize(100).        // ✅ allow up to 50 concurrent connections
-        SetMinPoolSize(10).         // ✅ keep at least 5 warm connections
-        SetMaxConnIdleTime(60 * time.Second) // ✅ recycle idle connections
-    
-    client, err:= mongo.Connect(ctx, clientOpts)
+        SetMaxPoolSize(100).
+        SetMinPoolSize(10).
+        SetMaxConnIdleTime(60 * time.Second)
+
+    client, err := mongo.Connect(ctx, clientOpts)
     if err != nil {
-        log.Fatal(err)
+        log.Fatal("MongoDB connect error:", err)
+    }
+
+    // ✅ Now ping after client is initialized
+    if err := client.Ping(ctx, nil); err != nil {
+        log.Fatalf("MongoDB connection failed: %v", err)
     }
 
     Client = client

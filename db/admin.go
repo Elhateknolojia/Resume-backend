@@ -18,20 +18,20 @@ func GetAdminByEmail(email string) (models.Admin, error) {
 }
 
 
-func GetStats() map[string]interface{} {
-    usersCount := CountUsers()
-    adminsCount := CountAdmins()
-    freeCount := CountByTier("free")
-    premiumCount := CountByTier("premium")
-    yearlyCount := CountByTier("1y")
-    monthlyCount := CountByTier("1m")
+// func GetStats() map[string]interface{} {
+//     usersCount := CountUsers()
+//     adminsCount := CountAdmins()
+//     freeCount := CountByTier("free")
+//     premiumCount := CountByTier("premium")
+//     yearlyCount := CountByTier("1y")
+//     monthlyCount := CountByTier("1m")
 
-    return map[string]interface{}{
-        "users":   usersCount,
-        "admins":  adminsCount,
-        "free":    freeCount,
-        "premium": premiumCount,
-        "yearly":  yearlyCount,
-        "monthly": monthlyCount,
-    }
-}
+//     return map[string]interface{}{
+//         "users":   usersCount,
+//         "admins":  adminsCount,
+//         "free":    freeCount,
+//         "premium": premiumCount,
+//         "yearly":  yearlyCount,
+//         "monthly": monthlyCount,
+//     }
+// }
