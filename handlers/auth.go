@@ -148,16 +148,17 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
     })
 
     // Also return JSON for frontend state hydration if needed
-    resp := map[string]interface{}{
-        "email":   user.Email,
-        "isAdmin": user.IsAdmin,
-        "tier":    user.Tier,
-        "token":    token,
-        // "UserID": user.ID,
-    }
+    resp := models.LoginResponse{
+    Token:   token,
+    UserID:  user.ID,
+    Email:   user.Email,
+    IsAdmin: user.IsAdmin,
+    Tier:    user.Tier,
+}
 
-    w.Header().Set("Content-Type", "application/json")
-    json.NewEncoder(w).Encode(resp)
+w.Header().Set("Content-Type", "application/json")
+json.NewEncoder(w).Encode(resp)
+
 }
 
 
