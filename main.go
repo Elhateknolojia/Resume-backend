@@ -83,6 +83,10 @@ func main() {
     r.HandleFunc("/api/auth/login", handlers.LoginHandler).Methods("POST")
 	r.HandleFunc("/api/admin/login", handlers.AdminLoginHandler).Methods("POST")
 
+    r.HandleFunc("/api/auth/session", handlers.SessionHandler).Methods("GET")
+    r.HandleFunc("/api/auth/logout", handlers.LogoutHandler).Methods("POST")
+
+
     r.HandleFunc("/api/admin/stats", handlers.AdminStatsHandler).Methods("GET")
 
     r.HandleFunc("/plans", handlers.PlansHandler).Methods("GET")

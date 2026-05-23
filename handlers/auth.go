@@ -5,8 +5,10 @@ import (
 	"Backend/db"
 	"Backend/middleware"
 	"Backend/models"
-    "time"
 	"encoding/json"
+	"strings"
+	"time"
+
 	// "go/token"
 	// "hash"
 	"log"
@@ -192,13 +194,26 @@ func RefreshHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func SessionHandler(w http.ResponseWriter, r *http.Request) {
-    cookie, err := r.Cookie("jwt")
-    if err != nil || cookie.Value == "" {
+    var tokenStr string
+
+    // First check Authorization header
+    authHeader := r.Header.Get("Authorization")
+    if strings.HasPrefix(authHeader, "Bearer ") {
+        tokenStr = strings.TrimPrefix(authHeader, "Bearer ")
+    } else {
+        // Fallback: check cookie
+        cookie, err := r.Cookie("jwt")
+        if err == nil {
+            tokenStr = cookie.Value
+        }
+    }
+
+    if tokenStr == "" {
         http.Error(w, "No session", http.StatusUnauthorized)
         return
     }
 
-    claims, err := middleware.ValidateToken(cookie.Value)
+    claims, err := middleware.ValidateToken(tokenStr)
     if err != nil {
         http.Error(w, "Invalid token", http.StatusUnauthorized)
         return
@@ -213,6 +228,7 @@ func SessionHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func LogoutHandler(w http.ResponseWriter, r *http.Request) {
+    // Clear cookie
     http.SetCookie(w, &http.Cookie{
         Name:     "jwt",
         Value:    "",
@@ -223,5 +239,8 @@ func LogoutHandler(w http.ResponseWriter, r *http.Request) {
         Expires:  time.Unix(0, 0),
         MaxAge:   -1,
     })
+
+    // Optionally, you can just rely on client clearing localStorage token
     w.WriteHeader(http.StatusOK)
+    json.NewEncoder(w).Encode(map[string]string{"message": "Logged out"})
 }
