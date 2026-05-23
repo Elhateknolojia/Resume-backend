@@ -37,8 +37,11 @@ func SignupHandler(w http.ResponseWriter, r *http.Request) {
     existingUser, _ := db.GetUserByEmail(creds.Email)
     log.Printf("Existing user lookup in %s", time.Since(existingUserstart))
 
+  
 
-    if existingUser != nil {
+
+
+    if existingUser != nil  {
         w.WriteHeader(http.StatusConflict)
         json.NewEncoder(w).Encode(map[string]string{
             "error":   "User already exists, try forget password",
@@ -57,22 +60,20 @@ func SignupHandler(w http.ResponseWriter, r *http.Request) {
         Password: auth.HashPassword(creds.Password),
         IsAdmin:  false,
         Tier:     "free",
+        OTPCode:  generateOTP(),
+        OTPExpiry: time.Now().Add(10 * time.Minute).Unix(),
     }
+
     log.Printf("User  creation in %s", time.Since(creatuserstart))
 
-    otp := generateOTP()
-    expiry := time.Now().Add(10 * time.Minute).Unix()
-
-    user.OTPCode = otp
-    user.OTPExpiry = expiry
-
+   
     if err := db.CreateUser(user); err != nil {
         http.Error(w, "Error saving user", http.StatusInternalServerError)
         return
     }
 
-    if err := sendEmailOTP(user.Email, otp); err != nil {
-        log.Printf("SendGrid error: %v", err)
+    if err := sendEmailOTP(user.Email, user.OTPCode); err != nil {
+        log.Printf("Mailgun error: %v", err)
         http.Error(w, "Failed to send OTP", http.StatusInternalServerError)
         return
     }
@@ -128,7 +129,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 
     // ⏱ Token generation
     tokenStart := time.Now()
-    token, err := middleware.GenerateToken(user.ID)
+    token, err := auth.GenerateJWT(user.ID, user.Email, "user", user.Tier, user.OTPCode == "")
     if err != nil {
         http.Error(w, "Could not generate token", http.StatusInternalServerError)
         return
@@ -151,6 +152,8 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
         "email":   user.Email,
         "isAdmin": user.IsAdmin,
         "tier":    user.Tier,
+        "token":    token,
+        // "UserID": user.ID,
     }
 
     w.Header().Set("Content-Type", "application/json")

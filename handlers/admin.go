@@ -21,7 +21,19 @@ func AdminLoginHandler(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    token, _ := auth.GenerateJWT(admin.ID)
+    token, err := auth.GenerateJWT(
+    admin.ID,
+    admin.Email,
+    "admin",        // role hardcoded for admins
+    admin.Tier,     // tier from DB
+    true,           // admins are always verified
+)
+
+   if err != nil {
+        http.Error(w, "Token generation failed", http.StatusInternalServerError)
+        return
+    }
+
     json.NewEncoder(w).Encode(map[string]interface{}{
         "success": true,
         "email":   admin.Email,

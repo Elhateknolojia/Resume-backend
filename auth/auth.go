@@ -58,10 +58,28 @@ func CheckPasswordHash(password string, stored string) bool {
     return HashPassword(password) == stored
 }
 
-// JWT generator
-func GenerateJWT(userID string) (string, error) {
-    token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-        "user_id": userID,
-    })
+// JWT claims
+type Claims struct {
+    UserID   string `json:"user_id"`
+    Email    string `json:"email"`
+    Role     string `json:"role"`
+    Tier     string `json:"tier"`
+    Verified bool   `json:"verified"`
+    jwt.RegisteredClaims
+}
+
+func GenerateJWT(userID, email, role, tier string, verified bool) (string, error) {
+    claims := &Claims{
+        UserID:   userID,
+        Email:    email,
+        Role:     role,
+        Tier:     tier,
+        Verified: verified,
+        RegisteredClaims: jwt.RegisteredClaims{
+            ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
+            IssuedAt:  jwt.NewNumericDate(time.Now()),
+        },
+    }
+    token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
     return token.SignedString(jwtKey)
 }
