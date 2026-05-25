@@ -158,7 +158,7 @@ corsHandler := ghandlers.CORS(
         // "http://localhost:4200",              // Angular dev
         // "http://localhost:4000",
         // "http://localhost:2000",
-        "http://localhost:3000",              // if you test on 3000
+        // "http://localhost:3000",              // if you test on 3000
          "https://resume.elitesuites.top",
          "https://www.elitesuites.top",
          "https://elitesuites.top",
@@ -171,7 +171,7 @@ corsHandler := ghandlers.CORS(
         "https://coverletter-1-sbiz.onrender.com",
         "https://resume-backend-plmv.onrender.com",
         // "https://resume-backend-weld.vercel.app/",
-        "*",
+        // "*",
     }),
     ghandlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}),
     ghandlers.AllowedHeaders([]string{"Authorization", "Content-Type"}),
