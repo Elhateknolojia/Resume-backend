@@ -39,7 +39,7 @@ func main() {
     if mongoURI == "" {
         log.Fatal("MONGO_URI not set in environment")
     }
-    db.InitDB(mongoURI, "resumeDB", "users", "userinputs", "admin", "local")
+    db.InitDB(mongoURI, "resumeDB", "users", "userinputs", "jobs", "admin", "local")
 
     // in main.go
     // Replace this line:
@@ -126,6 +126,12 @@ func main() {
 
     r.HandleFunc("/coverletter/generate", handlers.GenerateCoverLetterHandler).Methods("POST")
     r.HandleFunc("/coverletter/suggestions", handlers.ImprovementSuggestionsHandler).Methods("POST")
+
+
+// ✅ New Job routes with Gorilla Mux
+r.HandleFunc("/api/jobs", handlers.GetJobs).Methods("GET")
+r.HandleFunc("/api/jobs", handlers.CreateJob).Methods("POST")
+r.HandleFunc("/api/jobs/{id}", handlers.DeleteJob).Methods("DELETE")
 
 
     // Protected routes

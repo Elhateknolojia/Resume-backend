@@ -13,6 +13,7 @@ import (
 var Client *mongo.Client
 var UserCollection *mongo.Collection
 var InputCollection *mongo.Collection
+var JobCollection *mongo.Collection
 
 
 func InitDB(uri, dbName string, collections ...string) {
@@ -39,7 +40,7 @@ func InitDB(uri, dbName string, collections ...string) {
     db := Client.Database(dbName)
     UserCollection = db.Collection("users")
     InputCollection = db.Collection("userinputs")
-
+    JobCollection = db.Collection("jobs") // ✅ add this line
     log.Println("Connected to MongoDB:", dbName)
 }
 
