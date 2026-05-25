@@ -33,6 +33,7 @@ type LoginResponse struct {
     Token   string `json:"token"`
     UserID  string `json:"user_id"`
     Email   string `json:"email"`
+Name    string     `json:"name" bson:"name"`
     IsAdmin bool   `json:"isAdmin"`
     Tier    string `json:"tier"`
 }

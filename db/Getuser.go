@@ -94,3 +94,29 @@ func GetStats() map[string]interface{} {
         "monthly": monthlyCount,
     }
 }
+// GetAllUsers returns all users from the collection
+func GetAllUsers() ([]models.User, error) {
+    ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+    defer cancel()
+
+    cursor, err := UserCollection.Find(ctx, bson.M{})
+    if err != nil {
+        return nil, err
+    }
+    defer cursor.Close(ctx)
+
+    var users []models.User
+    for cursor.Next(ctx) {
+        var user models.User
+        if err := cursor.Decode(&user); err != nil {
+            return nil, err
+        }
+        users = append(users, user)
+    }
+
+    if err := cursor.Err(); err != nil {
+        return nil, err
+    }
+
+    return users, nil
+}

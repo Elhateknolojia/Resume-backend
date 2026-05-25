@@ -131,29 +131,44 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 
     // ⏱ Token generation
     tokenStart := time.Now()
-    token, err := auth.GenerateJWT(user.ID, user.Email, "user", user.Tier, user.OTPCode == "")
+    token, err := auth.GenerateJWT(user.ID, user.Email, "user", user.Tier, user.OTPCode == "", user.Name)
     if err != nil {
         http.Error(w, "Could not generate token", http.StatusInternalServerError)
         return
     }
     log.Printf("[Login] Token generation in %s", time.Since(tokenStart))
  // ✅ Set JWT cookie for all subdomains
+    // http.SetCookie(w, &http.Cookie{
+    //     Name:     "jwt",
+    //     Value:    token,
+    //     Path:     "/",
+    //     Domain:   ".elitesuites.top", // covers resume, jobsearch, coverletter, etc.
+    //     HttpOnly: true,
+    //     Secure:   true,
+    //     SameSite: http.SameSiteLaxMode,
+    //     Expires:  time.Now().Add(24 * time.Hour),
+    // })
+
+
     http.SetCookie(w, &http.Cookie{
-        Name:     "jwt",
-        Value:    token,
-        Path:     "/",
-        Domain:   ".elitesuites.top", // covers resume, jobsearch, coverletter, etc.
-        HttpOnly: true,
-        Secure:   true,
-        SameSite: http.SameSiteLaxMode,
-        Expires:  time.Now().Add(24 * time.Hour),
-    })
+    Name:     "jwt",
+    Value:    token,
+    Path:     "/",
+    // Domain:   "localhost", // ✅ works in dev
+    HttpOnly: true,
+    Secure:   false,       // disable in dev
+    SameSite: http.SameSiteLaxMode,
+    Expires:  time.Now().Add(24 * time.Hour),
+})
+
+
 
     // Also return JSON for frontend state hydration if needed
     resp := models.LoginResponse{
     Token:   token,
     UserID:  user.ID,
     Email:   user.Email,
+    Name:    user.Name,   // ✅ add this
     IsAdmin: user.IsAdmin,
     Tier:    user.Tier,
 }
@@ -224,21 +239,35 @@ func SessionHandler(w http.ResponseWriter, r *http.Request) {
         "email":    claims["email"],
         "isAdmin":  claims["isAdmin"],
         "tier":     claims["tier"],
+        "name":     claims["name"],   // ✅ now available
     })
+
 }
 
 func LogoutHandler(w http.ResponseWriter, r *http.Request) {
     // Clear cookie
+    // http.SetCookie(w, &http.Cookie{
+    //     Name:     "jwt",
+    //     Value:    "",
+    //     Path:     "/",
+    //     Domain:   ".elitesuites.top",
+    //     HttpOnly: true,
+    //     Secure:   true,
+    //     Expires:  time.Unix(0, 0),
+    //     MaxAge:   -1,
+    // })
+
     http.SetCookie(w, &http.Cookie{
-        Name:     "jwt",
-        Value:    "",
-        Path:     "/",
-        Domain:   ".elitesuites.top",
-        HttpOnly: true,
-        Secure:   true,
-        Expires:  time.Unix(0, 0),
-        MaxAge:   -1,
-    })
+    Name:     "jwt",
+    Value:    "",
+    Path:     "/",
+    // Domain:   "localhost", // ✅ works in dev
+    HttpOnly: true,
+    Secure:   false,       // disable in dev
+    SameSite: http.SameSiteLaxMode,
+    Expires:  time.Now().Add(24 * time.Hour),
+})
+
 
     // Optionally, you can just rely on client clearing localStorage token
     w.WriteHeader(http.StatusOK)

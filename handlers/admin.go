@@ -21,14 +21,7 @@ func AdminLoginHandler(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    token, err := auth.GenerateJWT(
-    admin.ID,
-    admin.Email,
-    "admin",        // role hardcoded for admins
-    admin.Tier,     // tier from DB
-    true,           // admins are always verified
-)
-
+  token, err := auth.GenerateJWT(admin.ID, admin.Email, "admin", admin.Tier, true, admin.Name)
    if err != nil {
         http.Error(w, "Token generation failed", http.StatusInternalServerError)
         return
@@ -47,4 +40,20 @@ func AdminLoginHandler(w http.ResponseWriter, r *http.Request) {
 func AdminStatsHandler(w http.ResponseWriter, r *http.Request) {
     stats := db.GetStats() // implement this in db package
     json.NewEncoder(w).Encode(stats)
+}
+
+func AdminUsersHandler(w http.ResponseWriter, r *http.Request) {
+    if r.Method != http.MethodGet {
+        http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+        return
+    }
+
+    users, err := db.GetAllUsers()
+    if err != nil {
+        http.Error(w, "Failed to fetch users", http.StatusInternalServerError)
+        return
+    }
+
+    w.Header().Set("Content-Type", "application/json")
+    json.NewEncoder(w).Encode(users)
 }

@@ -65,16 +65,19 @@ type Claims struct {
     Role     string `json:"role"`
     Tier     string `json:"tier"`
     Verified bool   `json:"verified"`
+    Name     string `json:"name"`   // ✅ add this
     jwt.RegisteredClaims
 }
 
-func GenerateJWT(userID, email, role, tier string, verified bool) (string, error) {
+
+func GenerateJWT(userID, email, role, tier string, verified bool, name string) (string, error) {
     claims := &Claims{
         UserID:   userID,
         Email:    email,
         Role:     role,
         Tier:     tier,
         Verified: verified,
+        Name:     name,   // ✅ include name
         RegisteredClaims: jwt.RegisteredClaims{
             ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
             IssuedAt:  jwt.NewNumericDate(time.Now()),
@@ -83,3 +86,4 @@ func GenerateJWT(userID, email, role, tier string, verified bool) (string, error
     token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
     return token.SignedString(jwtKey)
 }
+
