@@ -1,18 +1,22 @@
 package main
 
 import (
-    "log"
-    "net/http"
-    ghandlers "github.com/gorilla/handlers" // alias Gorilla handlers
-    "github.com/gorilla/mux"
-    "Backend/handlers"                      // your own handlers
-    "Backend/middleware"
-    "Backend/db"
-    "os"
-    // "github.com/rs/cors"
-    "github.com/joho/godotenv"   // ✅ add this
-    // "Backend/auth"
-    // "fmt"
+	"Backend/db"
+	"Backend/handlers" // your own handlers
+	"Backend/middleware"
+	"log"
+	"net/http"
+	"os"
+
+	ghandlers "github.com/gorilla/handlers" // alias Gorilla handlers
+	"github.com/gorilla/mux"
+	// "golang.org/x/oauth2"
+	// "golang.org/x/oauth2/google"
+
+	// "github.com/rs/cors"
+	"github.com/joho/godotenv" // ✅ add this
+	// "Backend/auth"
+	// "fmt"
 )
 
 
@@ -41,6 +45,8 @@ func main() {
     }
     db.InitDB(mongoURI, "resumeDB", "users", "userinputs", "jobs", "admin", "local")
 
+
+
     // in main.go
     // Replace this line:
 // http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
@@ -68,6 +74,8 @@ func main() {
     r.HandleFunc("/api/docx/save", handlers.SaveDocxHandler).Methods("POST")
 
 
+r.HandleFunc("/api/auth/google/url", handlers.GoogleLoginURLHandler).Methods("GET")
+r.HandleFunc("/api/auth/google/callback", handlers.GoogleCallbackHandler).Methods("GET")
 
     // // PDF Reconstruction (Export)
     // r.HandleFunc("/api/pdf/reconstruct", handlers.ReconstructPdfHandler).Methods("POST")
