@@ -157,7 +157,7 @@ corsHandler := ghandlers.CORS(
         "https://coverletter-1-sbiz.onrender.com",
         "https://resume-backend-plmv.onrender.com",
         // "https://resume-backend-weld.vercel.app/",
-        // "*",/ // Allow all origins (for development, be cautious in production)
+        "*",
     }),
     ghandlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}),
     ghandlers.AllowedHeaders([]string{"Authorization", "Content-Type"}),
