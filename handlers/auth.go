@@ -154,7 +154,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
     Name:     "jwt",
     Value:    token,
     Path:     "/",
-    // Domain:   "localhost", // ✅ works in dev
+    Domain:   "localhost", // ✅ works in dev
     HttpOnly: true,
     Secure:   false,       // disable in dev
     SameSite: http.SameSiteLaxMode,
