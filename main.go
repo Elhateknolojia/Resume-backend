@@ -60,9 +60,9 @@ func main() {
 
 
     // Handle OPTIONS requests globally
-    r.Methods(http.MethodOptions).HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-        w.WriteHeader(http.StatusOK)
-    })
+    // r.Methods(http.MethodOptions).HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+    //     w.WriteHeader(http.StatusOK)
+    // })
     // Public routes
     // r.HandleFunc("/api/pdf/import", handlers.ImportPdfHandler).Methods("POST")
     // PDF routes
@@ -156,28 +156,26 @@ r.HandleFunc("/api/jobs/{id}", handlers.DeleteJob).Methods("DELETE")
 
 corsHandler := ghandlers.CORS(
     ghandlers.AllowedOrigins([]string{
-        // "http://localhost:4200",              // Angular dev
-        // "http://localhost:4000",
-        // "http://localhost:2000",
-        "http://localhost:3000",              // if you test on 3000
-         "https://resume.elitesuites.top",
-         "https://www.elitesuites.top",
-         "https://elitesuites.top",
+        "http://localhost:3000",
+        "https://resume.elitesuites.top",
+        "https://www.elitesuites.top",
+        "https://elitesuites.top",
         "https://pdfeditor.elitesuites.top",
         "https://coverletter.elitesuites.top",
         "http://localhost:40833/",
         "https://jobsearch.elitesuites.top",
-        "https://resume-six-dun.vercel.app",
+        "https://elitecvb.vercel.app",
         "https://www.elitesuites.top/",
         "https://resumebuilder-pdfeditor.onrender.com",
         "https://coverletter-1-sbiz.onrender.com",
-        "https://resume-backend-plmv.onrender.com",
-        // "https://resume-backend-weld.vercel.app/",
-        "*",
+        // Allow the AI Studio preview environment URLs as well if needed
+        "https://ais-dev-pscdmfdolyl7afkxluruyw-312920497917.us-east1.run.app",
+        "https://ais-pre-pscdmfdolyl7afkxluruyw-312920497917.us-east1.run.app",
     }),
     ghandlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}),
-    ghandlers.AllowedHeaders([]string{"Authorization", "Content-Type"}),
+    ghandlers.AllowedHeaders([]string{"Authorization", "Content-Type", "X-Requested-With", "Accept"}), // Added a few standard headers
     ghandlers.AllowCredentials(),
+    ghandlers.OptionStatusCode(http.StatusOK), // Ensures preflight returns 200 OK
 )(r)
 
 
